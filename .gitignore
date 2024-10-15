@@ -8,5 +8,5 @@
 *.out
 go.work
 go.work.sum
-.env
+config.yaml
 example.sqlite3

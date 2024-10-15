@@ -5,7 +5,7 @@ import (
 )
 
 /*
-* Singleton interfaces for echo v4
+* types interface for echo v4
 * defined router union echo group and itself with limitations
 * */
 

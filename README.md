@@ -13,3 +13,17 @@ go get -u // update all go packages
 $env:CGO_ENABLED=1
 $env:CC="toolchains/mingw/bin/gcc"
 ```
+
+### Simplify Web Framework Alternative `echo.Echo`
+
+- Web Framework [git.akyoto.dev/go/web](https://git.akyoto.dev/go/web)
+
+```powershell
+go get -u git.akyoto.dev/go/web
+```
+
+### Dependencies Wanna Try
+
+```shell
+go get github.com/go-viper/mapstructure/v2
+```
