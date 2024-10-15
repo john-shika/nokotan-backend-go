@@ -59,7 +59,7 @@ func login(db *gorm.DB) echo.HandlerFunc {
 
 		email := user.Email
 		username := user.Username
-		password := cores.NewBase64EncodeToString(cores.GetBytesArraySliceSizeN(sha256.Sum256([]byte(user.Password))))
+		password := cores.NewBase64EncodeToString(cores.GetArraySliceSize32(sha256.Sum256([]byte(user.Password))))
 
 		if email != "" {
 			if tx := db.First(&user, "email = ? AND password = ?", email, password); tx.Error != nil {

@@ -35,10 +35,10 @@ func main() {
 	if err = db.AutoMigrate(&models.Todo{}); err != nil {
 		panic(fmt.Errorf("failed to migrate database: %w", err))
 	}
-	password := cores.NewBase64EncodeToString(cores.GetBytesArraySliceSizeN(sha256.Sum256([]byte("Admin@1234"))))
+	password := cores.NewBase64EncodeToString(cores.GetArraySliceSize32(sha256.Sum256([]byte("Admin@1234"))))
 	db.Create(&models.User{
 		UUID:     cores.NewUuid(),
-		Email:    "admin@localhost",
+		Email:    cores.NewNullString("admin@localhost"),
 		Username: "admin",
 		Password: password,
 		Role:     "admin,user",
