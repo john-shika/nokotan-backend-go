@@ -21,6 +21,18 @@ var ErrJwtUserInvalid = errors.New("exception: JWT  user not found")
 var ErrJwtEmailInvalid = errors.New("exception: JWT  email not found")
 var ErrJwtSecretKeyNotFound = errors.New("exception: JWT  secret key not found")
 
+type JwtConfig struct {
+	Algorithm string `mapstructure:"algorithm" json:"algorithm"`
+	SecretKey string `mapstructure:"secret_key" json:"secretKey"`
+	Audience  string `mapstructure:"audience" json:"audience"`
+	Issuer    string `mapstructure:"issuer" json:"issuer"`
+	ExpiresIn string `mapstructure:"expires_in" json:"expiresIn"`
+}
+
+func NewJwtConfig() *JwtConfig {
+	return &JwtConfig{}
+}
+
 type JwtClaimNameTyped string
 
 const (

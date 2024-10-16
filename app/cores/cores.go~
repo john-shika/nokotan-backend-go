@@ -3,6 +3,7 @@ package cores
 import (
 	"encoding/base64"
 	"github.com/google/uuid"
+	"math/rand"
 	"strings"
 	"sync"
 )

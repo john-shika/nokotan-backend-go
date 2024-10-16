@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 	"encoding/hex"
+	"github.com/spf13/viper"
 )
 
 func EncodeHexToString(data []byte) string {
@@ -75,4 +76,16 @@ func GetHashSha512ToString(data []byte) string {
 func HashSha512StringCompare(data []byte, hash string) bool {
 	temp := GetHashSha512ToString(data)
 	return StringEquals(temp, hash)
+}
+
+func ViperJwtConfigUnmarshal(key string) (*JwtConfig, error) {
+	var err error
+	KeepVoid(err)
+
+	jwtConfig := NewJwtConfig()
+	if err = viper.UnmarshalKey(key, jwtConfig); err != nil {
+		return nil, err
+	}
+
+	return jwtConfig, nil
 }

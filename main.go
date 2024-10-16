@@ -15,15 +15,27 @@ import (
 
 func main() {
 	var err error
-	var db *gorm.DB
+	var jwtConfig *cores.JwtConfig
+	cores.KeepVoid(err, jwtConfig)
+
 	viper.SetConfigFile("config.yaml")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(".")
+
 	if err = viper.ReadInConfig(); err != nil {
 		panic(fmt.Errorf("fatal error config file: %w", err))
 	}
+	if jwtConfig, err = cores.ViperJwtConfigUnmarshal("jwt"); err != nil {
+		panic(fmt.Errorf("fatal error config file: %w", err))
+	}
+
+	var db *gorm.DB
+	cores.KeepVoid(db)
+
 	e := echo.New()
 	config := &gorm.Config{}
 
-	if db, err = gorm.Open(sqlite.Open("example.sqlite3"), config); err != nil {
+	if db, err = gorm.Open(sqlite.Open("migrations/dev.db"), config); err != nil {
 		panic("failed to connect database")
 	}
 	if err = db.AutoMigrate(&models.User{}); err != nil {
