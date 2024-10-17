@@ -4,12 +4,12 @@ import (
 	"example/app/cores"
 )
 
-var GlobalDefaults = cores.MapAny{
+var ConfigDefaults = cores.MapAny{
 	"jwtSettings": cores.MapAny{
 		"algorithm": "HS256",
-		"secretKey": "your-secret-key",
 		"audience":  "your-audience",
 		"issuer":    "your-issuer",
+		"secretKey": "your-secret-key",
 		"expiresIn": "1h",
 	},
 }

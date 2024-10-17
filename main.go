@@ -5,6 +5,7 @@ import (
 	"example/app/controllers/todo"
 	"example/app/controllers/user"
 	"example/app/cores"
+	"example/app/globals"
 	"example/app/models"
 	"fmt"
 	"github.com/labstack/echo/v4"
@@ -25,9 +26,8 @@ func main() {
 	if err = viper.ReadInConfig(); err != nil {
 		panic(fmt.Errorf("fatal error config file: %w", err))
 	}
-	if jwtConfig, err = cores.ViperJwtConfigUnmarshal("jwt"); err != nil {
-		panic(fmt.Errorf("fatal error config file: %w", err))
-	}
+
+	globals.GlobalJwtConfigInit()
 
 	var db *gorm.DB
 	cores.KeepVoid(db)
