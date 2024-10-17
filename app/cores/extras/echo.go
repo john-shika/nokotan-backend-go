@@ -1,15 +1,12 @@
 package extras
 
 import (
+	"example/app/cores"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
+	"strings"
 )
 
-/*
-* types interface for echo v4
-* defined router union echo group and itself with limitations
-* */
-
-// RouterImpl interface for a defined router union echo group and itself with limitations
 type RouterImpl interface {
 	Use(middleware ...echo.MiddlewareFunc)
 	CONNECT(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc) *echo.Route
@@ -26,4 +23,24 @@ type RouterImpl interface {
 	Group(prefix string, middleware ...echo.MiddlewareFunc) (sg *echo.Group)
 	RouteNotFound(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc) *echo.Route
 	Add(method, path string, handler echo.HandlerFunc, middleware ...echo.MiddlewareFunc) *echo.Route
+}
+
+func GetJwtToken(c echo.Context) (*jwt.Token, error) {
+	var ok bool
+	var err error
+	var token string
+	var jwtToken *jwt.Token
+	if token = strings.Trim(c.Request().Header.Get("Authorization"), " "); token == "" {
+		return nil, cores.ErrJwtTokenNotFound
+	}
+	if token, ok = strings.CutPrefix(token, "Bearer "); !ok {
+		return nil, cores.ErrJwtTokenNotFound
+	}
+	if token = strings.Trim(token, " "); token == "" {
+		return nil, cores.ErrJwtTokenNotFound
+	}
+	if jwtToken, err = ParseJwtToken(token); err != nil {
+		return nil, err
+	}
+	return jwtToken, nil
 }

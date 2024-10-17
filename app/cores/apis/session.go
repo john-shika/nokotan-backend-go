@@ -193,7 +193,7 @@ func GetJwtClaims(jwtToken *jwt.Token) (jwt.MapClaims, error) {
 	return claims, nil
 }
 
-// GetIatFromJwtClaims method get iat from jwt claims, prefer use `claims.GetIssuedAt()` method
+// GetIatFromJwtClaims method get iat from jwt claims, prefer use `claims.GetIssued()` method
 func GetIatFromJwtClaims(claims jwt.MapClaims) (time.Time, error) {
 	var ok bool
 	var iat int64
