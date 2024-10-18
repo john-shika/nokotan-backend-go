@@ -2,6 +2,7 @@ package cores
 
 import (
 	"encoding/base64"
+	"fmt"
 	"github.com/google/uuid"
 	"strings"
 	"sync"
@@ -30,6 +31,13 @@ func CopyStack[T any](value []T) []T {
 	temp := make([]T, len(value))
 	copy(temp, value)
 	return temp
+}
+
+func ToString(value any) string {
+	if value == nil {
+		return ""
+	}
+	return fmt.Sprintf("%v", value)
 }
 
 type ErrOrOkImpl interface {
@@ -90,7 +98,16 @@ func CastErr[E ErrOrOkImpl](eOk E) (error, bool) {
 func Unwrap[T any, E ErrOrOkImpl](result T, eOk E) T {
 	var ok bool
 	var err error
-	KeepVoid(ok, err)
+	var temp any
+	KeepVoid(ok, err, temp)
+
+	if temp, ok = CastAny(eOk); !ok {
+		panic("invalid data type")
+	}
+
+	if temp == nil {
+		return result
+	}
 
 	if err, ok = CastErr(eOk); !ok {
 		if !IsOk(eOk) {
@@ -112,8 +129,53 @@ type MapCollectionImpl[T any] interface {
 	StackCollectionImpl[T] | map[string]T
 }
 
+type MapImpl[T any] interface {
+	Len() int
+	Keys() []string
+	Values() []T
+	HasKey(key string) bool
+	ContainKeys(keys ...string) bool
+	GetValueByKey(key string) T
+	SetValueByKey(key string, value T) bool
+	RemoveByKey(key string) bool
+}
+
+type MapAnyImpl interface {
+	MapImpl[any]
+}
+
 type Map[T any] map[string]T
 type MapAny = Map[any]
+
+func NewMap[T any]() MapImpl[T] {
+	return make(Map[T])
+}
+
+func NewMapAny() MapAnyImpl {
+	return NewMap[any]()
+}
+
+func (m Map[T]) Len() int {
+	return len(m)
+}
+
+func (m Map[T]) Keys() []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	return keys
+}
+
+func (m Map[T]) Values() []T {
+	values := make([]T, 0, len(m))
+	for i, v := range m {
+		KeepVoid(i, v)
+
+		values = append(values, v)
+	}
+	return values
+}
 
 func (m Map[T]) HasKey(key string) bool {
 	var ok bool
@@ -125,7 +187,18 @@ func (m Map[T]) HasKey(key string) bool {
 	return true
 }
 
-func (m Map[T]) GetValue(key string) T {
+func (m Map[T]) ContainKeys(keys ...string) bool {
+	for i, key := range keys {
+		KeepVoid(i, key)
+
+		if !m.HasKey(key) {
+			return false
+		}
+	}
+	return true
+}
+
+func (m Map[T]) GetValueByKey(key string) T {
 	var ok bool
 	var value T
 	KeepVoid(ok, value)
@@ -135,14 +208,28 @@ func (m Map[T]) GetValue(key string) T {
 	return value
 }
 
-func (m Map[T]) SetValue(key string, value T) bool {
+func (m Map[T]) SetValueByKey(key string, value T) bool {
 	var ok bool
 	var temp T
 	KeepVoid(ok, temp, value)
+
 	if temp, ok = m[key]; !ok {
 		return false
 	}
 	m[key] = value
+	return true
+}
+
+func (m Map[T]) RemoveByKey(key string) bool {
+	var ok bool
+	var temp T
+	KeepVoid(ok, temp)
+
+	if temp, ok = m[key]; !ok {
+		return false
+	}
+
+	delete(m, key)
 	return true
 }
 
@@ -152,7 +239,7 @@ func Cast[T any](value any) (T, bool) {
 }
 
 func CastAny(value any) (any, bool) {
-	return Cast[any](value)
+	return value, true
 }
 
 func CastBool(value any) (bool, bool) {

@@ -20,15 +20,27 @@ class ChangeDir:
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 
-constraint = " | ".join([ f"~[{i}]T" for i in range(2, 1024) ])
-cases = "\n".join([ f"    case [{i}]T:\n        return GetArraySliceSize{i}(v)" for i in range(2, 1024) ])
-functions = "\n\n".join([ f"func GetArraySliceSize{i}[T any](data [{i}]T) []T \x7b\n    return data[:]\n\x7d" for i in range(2, 1024) ])
+def bit_range(s, n):
+    started = False
+    for i in range(n):
+        v = 2 ** i
+        if not started:
+            if v < s:
+                continue
+            started = True
+        if n <= v:
+            break
+        yield v
+
+constraint = " | ".join([ f"~[{i}]T" for i in bit_range(2, 8192) ])
+cases = "\n".join([ f"    case [{i}]T:\n        return GetArraySliceSize{i}(v)" for i in bit_range(2, 8192) ])
+functions = "\n\n".join([ f"func GetArraySliceSize{i}[T any](data [{i}]T) []T \x7b\n    return data[:]\n\x7d" for i in bit_range(2, 8192) ])
 
 template = """
 package cores
 
 type ArraySliceSizeNImpl[T any] interface {
-    ~[]T | ~[1]T | """ + constraint + """ | ~[1024]T
+    ~[]T | ~[1]T | """ + constraint + """ | ~[8192]T
 }
 
 func GetBoolArraySliceSizeN[V ArraySliceSizeNImpl[bool]](data V) []bool {
@@ -94,8 +106,8 @@ func GetArraySliceSizeN[T any, V ArraySliceSizeNImpl[T]](data V) []T {
         return v
     case [1]T:
         return GetArraySliceSize1(v)\n""" + cases + """
-    case [1024]T:
-        return GetArraySliceSize1024(v)
+    case [8192]T:
+        return GetArraySliceSize8192(v)
     default:
         panic("Exception: Invalid data type")
     }
@@ -105,7 +117,7 @@ func GetArraySliceSize1[T any](data [1]T) []T {
     return data[:]
 }\n""" + functions + """
 
-func GetArraySliceSize1024[T any](data [1024]T) []T {
+func GetArraySliceSize8192[T any](data [8192]T) []T {
     return data[:]
 }
 """

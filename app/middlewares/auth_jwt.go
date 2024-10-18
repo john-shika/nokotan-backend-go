@@ -1,11 +1,16 @@
 package middlewares
 
 import (
+	"example/app/cores"
+	"example/app/cores/extras"
+	"example/app/cores/schemas"
+	"example/app/globals"
 	"example/app/models"
-	"github.com/golang-jwt/jwt/v5"
+	"fmt"
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 	"net/http"
+	"time"
 )
 
 func AuthJWT(db *gorm.DB) echo.MiddlewareFunc {
@@ -16,17 +21,30 @@ func AuthJWT(db *gorm.DB) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			var err error
-			var jwtToken *jwt.Token
+			var token string
+			var jwtToken cores.JwtTokenImpl
 			var session *models.Session
-			if jwtToken, err = cores.GetJwtToken(c); err != nil {
-				return c.JSON(http.StatusUnauthorized, cores.NewMessageUnauthorized(err.Error()))
+			cores.KeepVoid(err, token, jwtToken, session)
+
+			if token, err = extras.GetJwtToken(c); err != nil {
+				return c.JSON(http.StatusUnauthorized, schemas.NewMessageBodyUnauthorized(err.Error(), nil))
 			}
-			if session, jwtToken, err = cores.ValidateJwtToken(db, jwtToken); err != nil {
-				return c.JSON(http.StatusUnauthorized, cores.NewMessageUnauthorized(err.Error()))
+
+			jwtConfig := globals.GetGlobalJwtConfig()
+			secretKey := jwtConfig.SecretKey
+			if jwtToken, err = cores.ParseJwtToken(token, secretKey); err != nil {
+				return c.JSON(http.StatusUnauthorized, schemas.NewMessageBodyUnauthorized(err.Error(), nil))
 			}
-			cores.KeepVoid(jwtToken, session)
+
+			jwtClaims := cores.Unwrap(cores.GetJwtClaimsFromJwtToken[time.Time](jwtToken))
+			jwtClaimsAccessData := cores.CvtJwtClaimsToJwtClaimsAccessData(jwtClaims)
+
+			fmt.Println(jwtClaimsAccessData)
+
+			c.Set("token", token)
 			c.Set("jwt_token", jwtToken)
-			c.Set("session", session)
+			c.Set("jwt_claims", jwtClaims)
+			c.Set("jwt_claims_access_data", jwtClaimsAccessData)
 			return next(c)
 		}
 	}

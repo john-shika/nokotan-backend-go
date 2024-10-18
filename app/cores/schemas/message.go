@@ -1,15 +1,17 @@
 package schemas
 
-type Message struct {
-	StatusOk   bool   `json:"statusOk"`
-	StatusCode int    `json:"statusCode"`
-	Status     string `json:"status"`
-	Message    string `json:"message"`
-	Data       any    `json:"data"`
+import "example/app/cores"
+
+type MessageBody struct {
+	StatusOk   bool   `json:"statusOk,required"`
+	StatusCode int    `json:"statusCode,required"`
+	Status     string `json:"status,required"`
+	Message    string `json:"message,required"`
+	Data       any    `json:"data,required"`
 }
 
-func NewMessage(statusOk bool, statusCode int, status string, message string, data any) *Message {
-	return &Message{
+func NewMessageBody(statusOk bool, statusCode int, status string, message string, data any) *MessageBody {
+	return &MessageBody{
 		StatusOk:   statusOk,
 		StatusCode: statusCode,
 		Status:     status,
@@ -18,26 +20,32 @@ func NewMessage(statusOk bool, statusCode int, status string, message string, da
 	}
 }
 
-func NewMessageSuccess(message string, data any) *Message {
-	return NewMessage(true, 200, "OK", message, data)
+func NewMessageBodyOk(message string, data any) *MessageBody {
+	status := cores.Default[cores.HttpStatusCodeValues]().FromCode(cores.HttpStatusCodeOk)
+	return NewMessageBody(false, cores.HttpStatusCodeOk, string(status), message, data)
 }
 
-func NewMessageCreated(message string, data any) *Message {
-	return NewMessage(true, 201, "created", message, data)
+func NewMessageBodyCreated(message string, data any) *MessageBody {
+	status := cores.Default[cores.HttpStatusCodeValues]().FromCode(cores.HttpStatusCodeCreated)
+	return NewMessageBody(false, cores.HttpStatusCodeCreated, string(status), message, data)
 }
 
-func NewMessageUnauthorized(message string) *Message {
-	return NewMessage(false, 401, "unauthorized", message, nil)
+func NewMessageBodyUnauthorized(message string, data any) *MessageBody {
+	status := cores.Default[cores.HttpStatusCodeValues]().FromCode(cores.HttpStatusCodeUnauthorized)
+	return NewMessageBody(false, cores.HttpStatusCodeUnauthorized, string(status), message, data)
 }
 
-func NewMessageBadRequest(message string) *Message {
-	return NewMessage(false, 400, "bad_request", message, nil)
+func NewMessageBodyBadRequest(message string, data any) *MessageBody {
+	status := cores.Default[cores.HttpStatusCodeValues]().FromCode(cores.HttpStatusCodeBadRequest)
+	return NewMessageBody(false, cores.HttpStatusCodeBadRequest, string(status), message, data)
 }
 
-func NewMessageNotFound(message string) *Message {
-	return NewMessage(false, 404, "not_found", message, nil)
+func NewMessageBodyNotFound(message string, data any) *MessageBody {
+	status := cores.Default[cores.HttpStatusCodeValues]().FromCode(cores.HttpStatusCodeNotFound)
+	return NewMessageBody(false, cores.HttpStatusCodeNotFound, string(status), message, data)
 }
 
-func NewMessageError(message string) *Message {
-	return NewMessage(false, 500, "error", message, nil)
+func NewMessageBodyInternalServerError(message string, data any) *MessageBody {
+	status := cores.Default[cores.HttpStatusCodeValues]().FromCode(cores.HttpStatusCodeInternalServerError)
+	return NewMessageBody(false, cores.HttpStatusCodeInternalServerError, string(status), message, data)
 }

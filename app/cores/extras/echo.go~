@@ -26,20 +26,17 @@ type RouterImpl interface {
 
 func GetJwtToken(c echo.Context) (string, error) {
 	var ok bool
+	var err error
 	var token string
-	cores.KeepVoid(ok, token)
-
+	var jwtToken cores.JwtTokenImpl
 	if token = strings.Trim(c.Request().Header.Get("Authorization"), " "); token == "" {
-		return "", cores.ErrJwtTokenNotFound
+		return nil, cores.ErrJwtTokenNotFound
 	}
-
 	if token, ok = strings.CutPrefix(token, "Bearer "); !ok {
 		return "", cores.ErrJwtTokenNotFound
 	}
-
 	if token = strings.Trim(token, " "); token == "" {
 		return "", cores.ErrJwtTokenNotFound
 	}
-
-	return token, nil
+	return token
 }

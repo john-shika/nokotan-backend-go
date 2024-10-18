@@ -2,16 +2,31 @@ package cores
 
 import (
 	"fmt"
+	"github.com/golang-jwt/jwt/v5"
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
 )
 
-func Equals(value, other any) bool {
+func EqualsReflection(value, other any) bool {
 	return reflect.DeepEqual(value, other)
 }
 
-func GetReflectValue(value any) reflect.Value {
+func PassTypeIndirectReflection(t reflect.Type) reflect.Type {
+	switch t.Kind() {
+	case reflect.Pointer:
+		return PassTypeIndirectReflection(t.Elem())
+	default:
+		return t
+	}
+}
+
+func TypeEqualsReflection(value reflect.Type, other reflect.Type) bool {
+	return PassTypeIndirectReflection(value) == PassTypeIndirectReflection(other)
+}
+
+func GetValueReflection(value any) reflect.Value {
 	var val reflect.Value
 	switch value.(type) {
 	case reflect.Type:
@@ -24,8 +39,8 @@ func GetReflectValue(value any) reflect.Value {
 	return val
 }
 
-func IsReflectValid(value any) bool {
-	val := GetReflectValue(value)
+func IsValidReflection(value any) bool {
+	val := GetValueReflection(value)
 	// must be not zero value
 	if val.IsValid() {
 		switch val.Kind() {
@@ -43,29 +58,32 @@ func IsReflectValid(value any) bool {
 	return false
 }
 
-func ReflectPassValueIndirect(value any) reflect.Value {
-	val := GetReflectValue(value)
-	if !IsReflectValid(val) {
-		panic("invalid value")
+func PassValueIndirectReflection(value any) reflect.Value {
+	val := GetValueReflection(value)
+
+	if !IsValidReflection(val) {
+		return val
 	}
-	kind := val.Kind()
-	if kind == reflect.Interface || kind == reflect.Pointer {
-		return ReflectPassValueIndirect(val.Elem())
+
+	switch val.Kind() {
+	case reflect.Interface, reflect.Pointer:
+		return PassValueIndirectReflection(val.Elem())
+	default:
+		return val
 	}
-	return val
 }
 
-func GetReflectType(value any) reflect.Type {
-	return ReflectPassValueIndirect(value).Type()
+func GetTypeReflection(value any) reflect.Type {
+	return PassValueIndirectReflection(value).Type()
 }
 
-func GetReflectKind(value any) reflect.Kind {
-	return ReflectPassValueIndirect(value).Kind()
+func GetKindReflection(value any) reflect.Kind {
+	return PassValueIndirectReflection(value).Kind()
 }
 
-func IsReflectCountable[T any](value T) bool {
-	val := ReflectPassValueIndirect(value)
-	if !IsReflectValid(val) {
+func IsCountableReflection[T any](value T) bool {
+	val := PassValueIndirectReflection(value)
+	if !IsValidReflection(val) {
 		panic("invalid value")
 	}
 	switch val.Kind() {
@@ -76,21 +94,27 @@ func IsReflectCountable[T any](value T) bool {
 	}
 }
 
-func ReflectCount(value any) int {
-	val := ReflectPassValueIndirect(value)
-	if !IsReflectCountable(val) {
+func GetSizeReflection(value any) int {
+	val := PassValueIndirectReflection(value)
+	if !IsCountableReflection(val) {
 		panic("value is not countable")
 	}
 	return val.Len()
 }
 
-func IsReflectEmpty(value any) bool {
-	return ReflectCount(value) == 0
+func IsZeroOrEmptyReflection(value any) bool {
+	if !IsValidReflection(value) {
+		return true
+	}
+	if IsCountableReflection(value) {
+		return GetSizeReflection(value) == 0
+	}
+	return false
 }
 
-func IsReflectStringable(value any) bool {
-	val := ReflectPassValueIndirect(value)
-	if !IsReflectValid(val) {
+func IsStringableReflection(value any) bool {
+	val := PassValueIndirectReflection(value)
+	if !IsValidReflection(val) {
 		panic("invalid value")
 	}
 	switch val.Kind() {
@@ -101,15 +125,100 @@ func IsReflectStringable(value any) bool {
 	}
 }
 
-func ToReflectString(value any) string {
-	val := ReflectPassValueIndirect(value)
-	if !IsReflectStringable(val) {
-		panic("value is not string")
+func IsExportedFieldReflection(value any) bool {
+	val := PassValueIndirectReflection(value)
+	if !IsValidReflection(val) {
+		return false
 	}
-	return val.String()
+	return val.CanInterface()
 }
 
-func ReflectRepr(obj any) string {
+func IsExportedFieldByIndexReflection(value any, index int) bool {
+	val := PassValueIndirectReflection(value)
+	if !IsValidReflection(val) {
+		return false
+	}
+	return IsExportedFieldReflection(val.Field(index))
+}
+
+func IsExportedFieldByNameReflection(value any, name string) bool {
+	val := PassValueIndirectReflection(value)
+	if !IsValidReflection(val) {
+		return false
+	}
+	return IsExportedFieldReflection(val.FieldByName(name))
+}
+
+var TimeTypeReflection = reflect.TypeOf(new(time.Time))
+var NumericDateTypeReflection = reflect.TypeOf(new(jwt.NumericDate))
+
+func IsDateTimeStringISO8601Reflection(value any) bool {
+	val := PassValueIndirectReflection(value)
+	if !IsValidReflection(val) {
+		return false
+	}
+	if TypeEqualsReflection(val.Type(), TimeTypeReflection) {
+		return true
+	} else if TypeEqualsReflection(val.Type(), NumericDateTypeReflection) {
+		return true
+	}
+	return false
+}
+
+func GetDateTimeStringISO8601Reflection(value any) string {
+	val := PassValueIndirectReflection(value)
+	if !IsValidReflection(val) {
+		return ""
+	}
+
+	if TypeEqualsReflection(val.Type(), TimeTypeReflection) {
+		t := val.Interface().(time.Time)
+		return t.UTC().Format(time.RFC3339)
+	} else if TypeEqualsReflection(val.Type(), NumericDateTypeReflection) {
+		// why not use a pointer for jwt.NumericDate, because
+		// has already pass value indirect reflection
+		t := val.Interface().(jwt.NumericDate).Time
+		return t.UTC().Format(time.RFC3339)
+	}
+	return ""
+}
+
+func ToStringReflection(value any) string {
+	val := PassValueIndirectReflection(value)
+	if !IsValidReflection(val) {
+		return "<undefined>"
+	}
+	switch val.Kind() {
+	case reflect.Bool:
+		return strconv.FormatBool(val.Bool())
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return strconv.FormatInt(val.Int(), 10)
+	case reflect.Uint, reflect.Uintptr, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return strconv.FormatUint(val.Uint(), 10)
+	case reflect.Float32, reflect.Float64:
+		return strconv.FormatFloat(val.Float(), 'f', -1, 64)
+	case reflect.Complex64, reflect.Complex128:
+		return strconv.FormatComplex(val.Complex(), 'f', -1, 128)
+	case reflect.String:
+		return strconv.Quote(val.String())
+	case reflect.Struct:
+		if IsDateTimeStringISO8601Reflection(val) {
+			return strconv.Quote(GetDateTimeStringISO8601Reflection(val))
+		}
+		return "<struct>"
+	case reflect.Array, reflect.Slice:
+		return "<array>"
+	case reflect.Map:
+		return "<map>"
+	default:
+		return "<undefined>"
+	}
+}
+
+func JsonPreviewPermuteIndentReflection(obj any, indent int, start int) string {
+	end := start + indent
+	whiteSpaceStart := strings.Repeat(" ", start)
+	whiteSpaceEnd := strings.Repeat(" ", end)
 	if obj == nil {
 		return "null"
 	}
@@ -119,79 +228,111 @@ func ReflectRepr(obj any) string {
 	if val, ok := obj.(StringableImpl); ok {
 		return strconv.Quote(val.ToString())
 	}
-	val := ReflectPassValueIndirect(obj)
-	if IsReflectValid(val) {
-		switch val.Kind() {
-		case reflect.Bool:
-			return strconv.FormatBool(val.Bool())
-		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			return strconv.FormatInt(val.Int(), 10)
-		case reflect.Uint, reflect.Uintptr, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-			return strconv.FormatUint(val.Uint(), 10)
-		case reflect.Float32, reflect.Float64:
-			return strconv.FormatFloat(val.Float(), 'f', -1, 64)
-		case reflect.Complex64, reflect.Complex128:
-			return strconv.FormatComplex(val.Complex(), 'f', -1, 128)
-		case reflect.String:
-			return strconv.Quote(val.String())
-		case reflect.Interface:
-			return strconv.Quote(fmt.Sprint(val.Interface()))
-		case reflect.Struct:
-			typ := val.Type()
-			numFields := typ.NumField()
-			temp := make([]string, 0)
-			for i := 0; i < numFields; i++ {
-				structField := typ.Field(i)
-				structTag := structField.Tag
-				fieldKey := strings.ToLower(structField.Name)
-				fieldVal := ReflectRepr(val.Field(i).Interface())
-				if nameTag, ok := structTag.Lookup("name"); ok {
-					fieldKey = nameTag
-				}
-				if jsonTag, ok := structTag.Lookup("json"); ok {
-					KeepVoid(jsonTag, ok)
-
-					// TODO: json tag not implemented yet
-
-					//tokens := strings.Split(jsonTag, ",")
-					//size := len(tokens)
-					//for j := 0; j < size; j++ {
-					//	token := strings.Trim(tokens[j], " ")
-					//	switch token {
-					//	case "-", "ignore", "ignored":
-					//		continue
-					//	case "omitempty", "notnull", "required":
-					//		if fieldVal == "null" || fieldVal == "\"\"" {
-					//			continue
-					//		}
-					//	}
-					//}
-				}
-				entry := strconv.Quote(fieldKey) + ": " + fieldVal
-				temp = append(temp, entry)
-			}
-			return "{" + strings.Join(temp, ", ") + "}"
-		case reflect.Array, reflect.Slice:
-			size := val.Len()
-			values := make([]string, size)
-			for i := 0; i < size; i++ {
-				elem := val.Index(i).Interface()
-				values[i] = ReflectRepr(elem)
-			}
-			return "[" + strings.Join(values, ", ") + "]"
-		case reflect.Map:
-			size := val.Len()
-			iter := val.MapRange()
-			values := make([]string, size)
-			for i := 0; iter.Next(); i++ {
-				key := iter.Key().Interface()
-				value := iter.Value().Interface()
-				values[i] = strconv.Quote(fmt.Sprint(key)) + ": " + ReflectRepr(value)
-			}
-			return "{" + strings.Join(values, ", ") + "}"
-		default:
-			panic("unknown type")
-		}
+	val := PassValueIndirectReflection(obj)
+	if !IsValidReflection(val) {
+		return "undefined"
 	}
-	return "undefined"
+	switch val.Kind() {
+	case reflect.Bool:
+		return strconv.FormatBool(val.Bool())
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return strconv.FormatInt(val.Int(), 10)
+	case reflect.Uint, reflect.Uintptr, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return strconv.FormatUint(val.Uint(), 10)
+	case reflect.Float32, reflect.Float64:
+		return strconv.FormatFloat(val.Float(), 'f', -1, 64)
+	case reflect.Complex64, reflect.Complex128:
+		return strconv.FormatComplex(val.Complex(), 'f', -1, 128)
+	case reflect.String:
+		return strconv.Quote(val.String())
+	case reflect.Struct:
+		if IsDateTimeStringISO8601Reflection(val) {
+			return strconv.Quote(GetDateTimeStringISO8601Reflection(val))
+		}
+
+		// scrape any fields
+		t := val.Type()
+		n := t.NumField()
+		temp := make([]string, 0)
+		for i := 0; i < n; i++ {
+			structField := t.Field(i)
+			structTag := structField.Tag
+			field := val.Field(i)
+			fieldKey := ToCamelCase(structField.Name)
+			fieldValue := "undefined"
+			if IsExportedFieldReflection(field) {
+				fieldValue = JsonPreviewPermuteIndentReflection(field.Interface(), indent, end)
+			}
+			if nameTag, ok := structTag.Lookup("name"); ok {
+				fieldKey = nameTag
+			}
+			if jsonTag, ok := structTag.Lookup("json"); ok {
+				KeepVoid(jsonTag, ok)
+
+				name := ""
+				tokens := strings.Split(jsonTag, ",")
+				size := len(tokens)
+				if size > 0 {
+					name = strings.Trim(tokens[0], " ")
+				}
+
+				if len(name) > 0 && name != "-" {
+					fieldKey = name
+				}
+
+				for j := 1; j < size; j++ {
+					token := strings.Trim(tokens[j], " ")
+					switch token {
+					case "-", "ignore", "ignored":
+						continue
+					case "omitempty", "notnull", "required":
+						if fieldValue == "undefined" ||
+							fieldValue == "null" ||
+							fieldValue == strconv.Quote("") {
+							continue
+						}
+					}
+				}
+			}
+
+			// added
+			entry := whiteSpaceEnd + strconv.Quote(fieldKey) + ": " + fieldValue
+			temp = append(temp, entry)
+		}
+		return "{\n" + strings.Join(temp, ",\n") + "\n" + whiteSpaceStart + "}"
+	case reflect.Array, reflect.Slice:
+		size := val.Len()
+		values := make([]string, size)
+		for i := 0; i < size; i++ {
+			elem := val.Index(i).Interface()
+			values[i] = whiteSpaceEnd + JsonPreviewPermuteIndentReflection(elem, indent, end)
+		}
+		if len(values) > 0 {
+			return "[\n" + strings.Join(values, ",\n") + "\n" + whiteSpaceStart + "]"
+		}
+		return "[]"
+	case reflect.Map:
+		size := val.Len()
+		iter := val.MapRange()
+		values := make([]string, size)
+		for i := 0; iter.Next(); i++ {
+			key := iter.Key().Interface()
+			value := iter.Value().Interface()
+			values[i] = whiteSpaceEnd + strconv.Quote(fmt.Sprint(key)) + ": " + JsonPreviewPermuteIndentReflection(value, indent, end)
+		}
+		if len(values) > 0 {
+			return "{\n" + strings.Join(values, ",\n") + "\n" + whiteSpaceStart + "}"
+		}
+		return "{}"
+	default:
+		return "undefined"
+	}
+}
+
+func JsonPreviewIndentReflection(obj any, indent int) string {
+	return JsonPreviewPermuteIndentReflection(obj, indent, 0)
+}
+
+func JsonPreviewReflection(obj any) string {
+	return JsonPreviewPermuteIndentReflection(obj, 4, 0)
 }

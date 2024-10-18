@@ -5,151 +5,24 @@ import (
 	"math/rand"
 )
 
-type Bool = bool
-type Int = int
-type Uint = uint
-type Int16 = int16
-type Uint16 = uint16
-type Int32 = int32
-type Uint32 = uint32
-type Int64 = int64
-type Uint64 = uint64
-type Float32 = float32
-type Float64 = float64
-type String = string
+// windows types like
+// https://docs.microsoft.com/en-us/windows/win32/winprog/windows-data-types
+// https://docs.microsoft.com/en-us/windows/win32/winprog/windows-data-types#basic-types
 
-type Char = int8
-type Byte = uint8
-type Short = int16
-type Ushort = uint16
-type Wchar = uint16
-type Word = uint16
-type Dword = uint
-type Dword32 = uint32
-type Dword64 = uint64
-
-type Long = int
-type Ulong = uint
-
-type Long64 = int64
-type Ulong64 = uint64
-
-type UintPtr = uintptr
-
-type Float = float32
-type Double = float64
-
-type UnionTypeBool interface {
-	~bool | Bool
-}
-
-type UnionTypeInt interface {
-	~int | Int | Long
-}
-
-type UnionTypeUint interface {
-	~uint | Uint | Ulong
-}
-
-type UnionTypeInt16 interface {
-	~int16 | Int16 | Short
-}
-
-type UnionTypeUint16 interface {
-	~uint16 | Uint16 | Ushort
-}
-
-type UnionTypeInt32 interface {
-	~int32 | Int32
-}
-
-type UnionTypeUint32 interface {
-	~uint32 | Uint32
-}
-
-type UnionTypeInt64 interface {
-	~int64 | Int64 | Long64
-}
-
-type UnionTypeUint64 interface {
-	~uint64 | Uint64 | Ulong64
-}
-
-type UnionTypeFloat32 interface {
-	~float32 | Float32 | Float
-}
-
-type UnionTypeFloat64 interface {
-	~float64 | Float64 | Double
-}
-
-type UnionTypeString interface {
-	~string | String
-}
-
-type UnionTypeChar interface {
-	~int8 | Char
-}
-
-type UnionTypeByte interface {
-	~uint8 | Byte
-}
-
-type UnionTypeShort interface {
-	~int16 | Short
-}
-
-type UnionTypeUshort interface {
-	~uint16 | Ushort
-}
-
-type UnionTypeWchar interface {
-	~uint16 | Wchar | Word | Ushort
-}
-
-type UnionTypeWord interface {
-	~uint16 | Wchar | Word | Ushort
-}
-
-type UnionTypeDword interface {
-	~uint | Dword | Uint | Ulong
-}
-
-type UnionTypeDword32 interface {
-	~uint32 | Dword32 | Uint32
-}
-
-type UnionTypeDword64 interface {
-	~uint64 | Dword64 | Uint64 | Ulong64
-}
-
-type UnionTypeLong interface {
-	~int | Long | Int
-}
-
-type UnionTypeUlong interface {
-	~uint | Ulong | Uint
-}
-
-type UnionTypeLong64 interface {
-	~int64 | Long64 | Int64
-}
-
-type UnionTypeUlong64 interface {
-	~uint64 | Ulong64 | Uint64
-}
-
-type UnionTypeUintPtr interface {
-	~uintptr | UintPtr | Uint64 | Ulong64
-}
-
-type UnionTypeFloat interface {
-	~float32 | Float | Float32
-}
-
-type UnionTypeDouble interface {
-	~float64 | Double | Float64
-}
+type CHAR = int8
+type SHORT = int16
+type WCHAR = uint16
+type USHORT = uint16
+type WORD = uint16
+type DWORD = uint
+type DWORD32 = uint32
+type DWORD64 = uint64
+type LONG = int
+type ULONG = uint
+type LONG64 = int64
+type ULONG64 = uint64
+type FLOAT = float32
+type DOUBLE = float64
 
 type Ordering int
 
