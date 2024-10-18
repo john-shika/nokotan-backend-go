@@ -165,6 +165,10 @@ func IsDateTimeStringISO8601Reflection(value any) bool {
 	return false
 }
 
+const (
+	TimeFormatISO8601 = "2006-01-02T15:04:05.000Z07:00"
+)
+
 func GetDateTimeStringISO8601Reflection(value any) string {
 	val := PassValueIndirectReflection(value)
 	if !IsValidReflection(val) {
@@ -173,12 +177,12 @@ func GetDateTimeStringISO8601Reflection(value any) string {
 
 	if TypeEqualsReflection(val.Type(), TimeTypeReflection) {
 		t := val.Interface().(time.Time)
-		return t.UTC().Format(time.RFC3339)
+		return t.UTC().Format(TimeFormatISO8601)
 	} else if TypeEqualsReflection(val.Type(), NumericDateTypeReflection) {
 		// why not use a pointer for jwt.NumericDate, because
 		// has already pass value indirect reflection
 		t := val.Interface().(jwt.NumericDate).Time
-		return t.UTC().Format(time.RFC3339)
+		return t.UTC().Format(TimeFormatISO8601)
 	}
 	return ""
 }
