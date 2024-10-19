@@ -102,7 +102,7 @@ func Unwrap[T any, E ErrOrOkImpl](result T, eOk E) T {
 	KeepVoid(ok, err, temp)
 
 	if temp, ok = CastAny(eOk); !ok {
-		panic("invalid data type")
+		panic(NewThrow("invalid data type", ErrDataTypeInvalid))
 	}
 
 	if temp == nil {
@@ -111,7 +111,7 @@ func Unwrap[T any, E ErrOrOkImpl](result T, eOk E) T {
 
 	if err, ok = CastErr(eOk); !ok {
 		if !IsOk(eOk) {
-			panic("invalid data type")
+			panic(NewThrow("invalid data type", ErrDataTypeInvalid))
 		} else {
 			return result
 		}

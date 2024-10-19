@@ -60,18 +60,27 @@ type JwtTokenImpl interface {
 	EncodeSegment(seg []byte) string
 }
 
-// TODO: not implemented yet
-
 type TimeOrJwtNumericDateImpl interface {
-	*jwt.NumericDate | time.Time
+	*jwt.NumericDate | time.Time | string | int64 | int
 }
 
 func GetTimeUtcFromAny(value any) time.Time {
+	val := PassValueIndirectReflection(value)
+	if !IsValidReflection(val) {
+		return Default[time.Time]()
+	}
+	value = val.Interface()
 	switch value.(type) {
-	case *jwt.NumericDate:
-		return value.(*jwt.NumericDate).Time.UTC()
+	case jwt.NumericDate:
+		return value.(jwt.NumericDate).Time.UTC()
 	case time.Time:
 		return value.(time.Time).UTC()
+	case string:
+		return Unwrap(ParseTimeUtcByStringISO8601(value.(string)))
+	case int64:
+		return GetTimeUtcByTimeStamp(value.(int64))
+	case int:
+		return GetTimeUtcByTimeStamp(int64(value.(int)))
 	default:
 		return Default[time.Time]()
 	}
@@ -82,11 +91,26 @@ func GetTimeUtcFromStrict[V TimeOrJwtNumericDateImpl](value V) time.Time {
 }
 
 func GetJwtNumericDateFromAny(value any) *jwt.NumericDate {
+	val := PassValueIndirectReflection(value)
+	if !IsValidReflection(val) {
+		return nil
+	}
+	value = val.Interface()
 	switch value.(type) {
-	case *jwt.NumericDate:
-		return value.(*jwt.NumericDate)
+	case jwt.NumericDate:
+		t := value.(jwt.NumericDate)
+		return &t
 	case time.Time:
 		return jwt.NewNumericDate(value.(time.Time))
+	case string:
+		t := Unwrap(ParseTimeUtcByStringISO8601(value.(string)))
+		return jwt.NewNumericDate(t)
+	case int64:
+		t := GetTimeUtcByTimeStamp(value.(int64))
+		return jwt.NewNumericDate(t)
+	case int:
+		t := GetTimeUtcByTimeStamp(int64(value.(int)))
+		return jwt.NewNumericDate(t)
 	default:
 		return nil
 	}
@@ -95,8 +119,6 @@ func GetJwtNumericDateFromAny(value any) *jwt.NumericDate {
 func GetJwtNumericDateFromStrict[V TimeOrJwtNumericDateImpl](value V) *jwt.NumericDate {
 	return GetJwtNumericDateFromAny(value)
 }
-
-// TODO: not implemented yet
 
 type JwtClaimsImpl interface {
 	GetDataAccess() *JwtClaimsDataAccess

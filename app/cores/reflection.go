@@ -219,6 +219,26 @@ func ToStringReflection(value any) string {
 	}
 }
 
+func PassBackValueIndirectByInterfaceReflection[T any](value any) T {
+	val := PassValueIndirectReflection(value)
+	if !IsValidReflection(val) {
+		return Default[T]()
+	}
+
+	var t T
+	KeepVoid(t)
+
+	if val.Type() == reflect.TypeOf(t) {
+		return Unwrap(Cast[T](val.Interface()))
+	}
+
+	panic(NewThrow("invalid data type", ErrDataTypeInvalid))
+}
+
+func PassBackAnyValueIndirectByInterfaceReflection(value any) any {
+	return PassBackValueIndirectByInterfaceReflection[any](value)
+}
+
 func JsonPreviewPermuteIndentReflection(obj any, indent int, start int) string {
 	end := start + indent
 	whiteSpaceStart := strings.Repeat(" ", start)
