@@ -1,7 +1,12 @@
 package cores
 
 import (
+	"github.com/golang-jwt/jwt/v5"
 	"time"
+)
+
+const (
+	TimeFormatISO8601 = "2006-01-02T15:04:05.000Z07:00"
 )
 
 func GetTimeUtcNow() time.Time {
@@ -17,42 +22,78 @@ func GetTimeUtcByTimeStamp(timeStamp int64) time.Time {
 }
 
 func GetTimeUtcNowStringISO8601() string {
-	return GetTimeUtcNow().Format(time.RFC3339)
+	return GetTimeUtcNow().Format(TimeFormatISO8601)
 }
 
-func ParseTimeUtcByStringISO8601(dateTime string) (time.Time, error) {
+func ParseTimeUtcByStringISO8601(value string) (time.Time, error) {
 	var err error
 	var t time.Time
-	if t, err = time.Parse(time.RFC3339, dateTime); err != nil {
+	if t, err = time.Parse(TimeFormatISO8601, value); err != nil {
 		return Default[time.Time](), err
 	}
 	return t.UTC(), nil
 }
 
 type TimeAnyImpl interface {
-	time.Time | string | int64 | int
+	*jwt.NumericDate | time.Time | string | int64 | int32 | int
 }
 
-func GetTimeUtcFromTimeAny(value any) time.Time {
+func GetTimeUtcISO8601(value any) (time.Time, error) {
+	var err error
+	var t time.Time
+	KeepVoid(err, t)
+
 	val := PassValueIndirectReflection(value)
 	if !IsValidReflection(val) {
-		return Default[time.Time]()
+		return Default[time.Time](), ErrDataTypeInvalid
 	}
 	value = val.Interface()
 	switch value.(type) {
+	case jwt.NumericDate:
+		// why not use a pointer for jwt.NumericDate, because
+		// has already pass value indirect reflection
+		return value.(jwt.NumericDate).Time.UTC(), nil
 	case time.Time:
-		return value.(time.Time).UTC()
+		return value.(time.Time).UTC(), nil
 	case string:
-		return Unwrap(ParseTimeUtcByStringISO8601(value.(string)))
+		v := Unwrap(Cast[string](value))
+		return ParseTimeUtcByStringISO8601(v)
 	case int64:
-		return GetTimeUtcByTimeStamp(value.(int64))
+		v := Unwrap(Cast[int64](value))
+		return GetTimeUtcByTimeStamp(v), nil
+	case int32:
+		v := Unwrap(Cast[int32](value))
+		return GetTimeUtcByTimeStamp(int64(v)), nil
 	case int:
-		return GetTimeUtcByTimeStamp(int64(value.(int)))
+		v := Unwrap(Cast[int](value))
+		return GetTimeUtcByTimeStamp(int64(v)), nil
 	default:
-		return Default[time.Time]()
+		return Default[time.Time](), ErrDataTypeInvalid
 	}
 }
 
-func GetTimeUtcFromTimeAnyStrict[V TimeAnyImpl](value V) time.Time {
-	return GetTimeUtcFromTimeAny(value)
+func GetTimeUtcFromTimeAnyStrict[V TimeAnyImpl](value V) (time.Time, error) {
+	return GetTimeUtcISO8601(value)
+}
+
+func IsTimeUtcISO8601(value any) bool {
+	var err error
+	var t time.Time
+	KeepVoid(err, t)
+
+	if t, err = GetTimeUtcISO8601(value); err != nil {
+		return false
+	}
+	return true
+}
+
+func ToTimeUtcStringISO8601(value any) string {
+	var err error
+	var t time.Time
+	KeepVoid(err, t)
+
+	if t, err = GetTimeUtcISO8601(value); err != nil {
+		return Default[time.Time]().Format(TimeFormatISO8601)
+	}
+	return t.Format(TimeFormatISO8601)
 }

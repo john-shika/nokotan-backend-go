@@ -19,6 +19,8 @@ const (
 	ShikaObjectDataTypeUint32
 	ShikaObjectDataTypeInt64
 	ShikaObjectDataTypeUint64
+	ShikaObjectDataTypeUintptr
+	ShikaObjectDataTypeFloat
 	ShikaObjectDataTypeFloat32
 	ShikaObjectDataTypeFloat64
 	ShikaObjectDataTypeComplex64
@@ -96,17 +98,18 @@ type ShikaHandleGetterFunc func() any
 type ShikaHandleSetterFunc func(value any)
 
 type ShikaObjectPropertyImpl interface {
-	GetKind() ShikaObjectDataTypeKind
 	GetValue() any
+	GetKind() ShikaObjectDataTypeKind
 	SetValue(value any)
 	IsConfigurable() bool
 	IsEnumerable() bool
 	IsWritable() bool
+	IsValid() bool
 }
 
 type ShikaObjectProperty struct {
-	Kind         ShikaObjectDataTypeKind
 	Value        any
+	Kind         ShikaObjectDataTypeKind
 	Get          ShikaHandleGetterFunc
 	Set          ShikaHandleSetterFunc
 	Configurable bool
@@ -114,22 +117,42 @@ type ShikaObjectProperty struct {
 	Writable     bool
 }
 
+func NewShikaObjectProperty(value any, kind ShikaObjectDataTypeKind) ShikaObjectPropertyImpl {
+	return &ShikaObjectProperty{
+		Value:        value,
+		Kind:         kind,
+		Get:          nil,
+		Set:          nil,
+		Configurable: true,
+		Enumerable:   true,
+		Writable:     true,
+	}
+}
+
+func (shikaObjectProperty *ShikaObjectProperty) GetValue() any {
+
+	// calling getter function
+	if shikaObjectProperty.Get != nil {
+		return shikaObjectProperty.Get()
+	}
+
+	// get value directly
+	return shikaObjectProperty.Value
+}
+
 func (shikaObjectProperty *ShikaObjectProperty) GetKind() ShikaObjectDataTypeKind {
 	return shikaObjectProperty.Kind
 }
 
-func (shikaObjectProperty *ShikaObjectProperty) GetValue() any {
-	if shikaObjectProperty.Get != nil {
-		return shikaObjectProperty.Get()
-	}
-	return shikaObjectProperty.Value
-}
-
 func (shikaObjectProperty *ShikaObjectProperty) SetValue(value any) {
+
+	// calling setter function
 	if shikaObjectProperty.Set != nil {
 		shikaObjectProperty.Set(value)
 		return
 	}
+
+	// set value directly
 	shikaObjectProperty.Value = value
 }
 
@@ -145,16 +168,15 @@ func (shikaObjectProperty *ShikaObjectProperty) IsWritable() bool {
 	return shikaObjectProperty.Writable
 }
 
-func NewShikaObjectProperty(value any, t ShikaObjectDataTypeKind) ShikaObjectPropertyImpl {
-	return &ShikaObjectProperty{
-		Kind:         t,
-		Value:        value,
-		Get:          nil,
-		Set:          nil,
-		Configurable: true,
-		Enumerable:   true,
-		Writable:     true,
+func (shikaObjectProperty *ShikaObjectProperty) IsValid() bool {
+	if shikaObjectProperty.Kind == ShikaObjectDataTypeString {
+		if v, ok := Cast[string](shikaObjectProperty.Value); ok {
+			return v != ""
+		}
+		return false
 	}
+	return shikaObjectProperty.Kind != ShikaObjectDataTypeUndefined &&
+		shikaObjectProperty.Kind != ShikaObjectDataTypeNull
 }
 
 type ShikaObjectAttributeImpl interface {
@@ -187,12 +209,12 @@ func (shikaObjectAttribute *ShikaObjectAttribute) GetParameters() []any {
 	return shikaObjectAttribute.Parameters
 }
 
-type ShikaObjectImpl interface {
+type ShikaVarObjectImpl interface {
 	GetName() string
 	GetOwnProperty() ShikaObjectPropertyImpl
-	GetProperties() []ShikaObject
+	GetProperties() []ShikaVarObjectImpl
 	SetOwnProperty(property ShikaObjectPropertyImpl)
-	SetProperties(properties []ShikaObject)
+	SetProperties(properties []ShikaVarObjectImpl)
 	PropertiesLength() int
 	GetPropertyKeys() []string
 	GetPropertyValues() []ShikaObjectPropertyImpl
@@ -211,135 +233,142 @@ type ShikaObjectImpl interface {
 	RemoveAttributeByName(name string)
 }
 
-type ShikaObject struct {
+type ShikaVarObject struct {
 	Name        string
 	OwnProperty ShikaObjectPropertyImpl
-	Properties  []ShikaObject
+	Properties  []ShikaVarObjectImpl
 	Attributes  []ShikaObjectAttributeImpl
 }
 
-func NewShikaObject(name string) ShikaObjectImpl {
-	return &ShikaObject{
+func NewShikaVarObject(name string) ShikaVarObjectImpl {
+	return &ShikaVarObject{
 		Name:        name,
 		OwnProperty: nil,
-		Properties:  make([]ShikaObject, 0),
+		Properties:  make([]ShikaVarObjectImpl, 0),
 	}
 }
 
-func (shikaObject *ShikaObject) GetName() string {
-	return shikaObject.Name
+func (shikaVarObject *ShikaVarObject) GetName() string {
+	return shikaVarObject.Name
 }
 
-func (shikaObject *ShikaObject) GetOwnProperty() ShikaObjectPropertyImpl {
-	return shikaObject.OwnProperty
+func (shikaVarObject *ShikaVarObject) GetOwnProperty() ShikaObjectPropertyImpl {
+	return shikaVarObject.OwnProperty
 }
 
-func (shikaObject *ShikaObject) GetProperties() []ShikaObject {
-	return shikaObject.Properties
+func (shikaVarObject *ShikaVarObject) GetProperties() []ShikaVarObjectImpl {
+	return shikaVarObject.Properties
 }
 
-func (shikaObject *ShikaObject) SetOwnProperty(property ShikaObjectPropertyImpl) {
-	shikaObject.OwnProperty = property
+func (shikaVarObject *ShikaVarObject) SetOwnProperty(property ShikaObjectPropertyImpl) {
+	shikaVarObject.OwnProperty = property
 }
 
-func (shikaObject *ShikaObject) SetProperties(properties []ShikaObject) {
-	shikaObject.Properties = properties
+func (shikaVarObject *ShikaVarObject) SetProperties(properties []ShikaVarObjectImpl) {
+	shikaVarObject.Properties = properties
 }
 
-func (shikaObject *ShikaObject) PropertiesLength() int {
-	return len(shikaObject.Properties)
+func (shikaVarObject *ShikaVarObject) PropertiesLength() int {
+	return len(shikaVarObject.Properties)
 }
 
-func (shikaObject *ShikaObject) GetPropertyKeys() []string {
-	keys := make([]string, 0, len(shikaObject.Properties))
-	for i, shikaObj := range shikaObject.Properties {
-		KeepVoid(i, shikaObj)
+func (shikaVarObject *ShikaVarObject) GetPropertyKeys() []string {
+	keys := make([]string, 0, len(shikaVarObject.Properties))
+	for i, shikaVarObj := range shikaVarObject.Properties {
+		KeepVoid(i, shikaVarObj)
 
-		keys = append(keys, shikaObj.Name)
+		keys = append(keys, shikaVarObj.GetName())
 	}
 	return keys
 }
 
-func (shikaObject *ShikaObject) GetPropertyValues() []ShikaObjectPropertyImpl {
-	values := make([]ShikaObjectPropertyImpl, 0, len(shikaObject.Properties))
-	for i, shikaObj := range shikaObject.Properties {
-		KeepVoid(i, shikaObj)
+func (shikaVarObject *ShikaVarObject) GetPropertyValues() []ShikaObjectPropertyImpl {
+	values := make([]ShikaObjectPropertyImpl, 0, len(shikaVarObject.Properties))
+	for i, shikaVarObj := range shikaVarObject.Properties {
+		KeepVoid(i, shikaVarObj)
 
-		values = append(values, shikaObj.OwnProperty)
+		values = append(values, shikaVarObj.GetOwnProperty())
 	}
 	return values
 }
 
-func (shikaObject *ShikaObject) HasPropertyKey(key string) bool {
-	for i, shikaObj := range shikaObject.Properties {
-		KeepVoid(i, shikaObj)
+func (shikaVarObject *ShikaVarObject) HasPropertyKey(key string) bool {
+	for i, shikaVarObj := range shikaVarObject.Properties {
+		KeepVoid(i, shikaVarObj)
 
-		if shikaObj.Name == key {
+		if shikaVarObj.GetName() == key {
 			return true
 		}
 	}
 	return false
 }
 
-func (shikaObject *ShikaObject) ContainPropertyKeys(keys ...string) bool {
+func (shikaVarObject *ShikaVarObject) ContainPropertyKeys(keys ...string) bool {
 	for i, key := range keys {
 		KeepVoid(i, key)
 
-		if !shikaObject.HasPropertyKey(key) {
+		if !shikaVarObject.HasPropertyKey(key) {
 			return false
 		}
 	}
 	return true
 }
 
-func (shikaObject *ShikaObject) GetPropertyByName(name string) ShikaObjectPropertyImpl {
-	for i, shikaObj := range shikaObject.Properties {
-		KeepVoid(i, shikaObj)
+func (shikaVarObject *ShikaVarObject) GetPropertyByName(name string) ShikaObjectPropertyImpl {
+	for i, shikaVarObj := range shikaVarObject.Properties {
+		KeepVoid(i, shikaVarObj)
 
-		if shikaObj.Name == name {
-			return shikaObj.OwnProperty
+		if shikaVarObj.GetName() == name {
+			return shikaVarObj.GetOwnProperty()
 		}
 	}
 	return nil
 }
 
-func (shikaObject *ShikaObject) SetPropertyByName(name string, property ShikaObjectPropertyImpl) {
-	for i, shikaObj := range shikaObject.Properties {
+func (shikaVarObject *ShikaVarObject) SetPropertyByName(name string, property ShikaObjectPropertyImpl) {
+
+	// replace existing property
+	for i, shikaObj := range shikaVarObject.Properties {
 		KeepVoid(i, shikaObj)
 
-		if shikaObj.Name == name {
-			shikaObject.Properties[i].OwnProperty = property
+		if shikaObj.GetName() == name {
+			shikaVarObject.Properties[i].SetOwnProperty(property)
 			return
 		}
 	}
+
+	// create new property
+	shikaVarObj := NewShikaVarObject(name)
+	shikaVarObj.SetOwnProperty(property)
+	shikaVarObject.Properties = append(shikaVarObject.Properties, shikaVarObj)
 }
 
-func (shikaObject *ShikaObject) RemovePropertyByName(name string) {
-	for i, shikaObj := range shikaObject.Properties {
-		KeepVoid(i, shikaObj)
+func (shikaVarObject *ShikaVarObject) RemovePropertyByName(name string) {
+	for i, shikaVarObj := range shikaVarObject.Properties {
+		KeepVoid(i, shikaVarObj)
 
-		if shikaObj.Name == name {
+		if shikaVarObj.GetName() == name {
 			j := i + 1
-			shikaObject.Properties = append(shikaObject.Properties[:i], shikaObject.Properties[j:]...)
+			shikaVarObject.Properties = append(shikaVarObject.Properties[:i], shikaVarObject.Properties[j:]...)
 			return
 		}
 	}
 }
 
-func (shikaObject *ShikaObject) GetAttributesLength() int {
-	return len(shikaObject.Attributes)
+func (shikaVarObject *ShikaVarObject) GetAttributesLength() int {
+	return len(shikaVarObject.Attributes)
 }
 
-func (shikaObject *ShikaObject) GetAttributes() []ShikaObjectAttributeImpl {
-	return shikaObject.Attributes
+func (shikaVarObject *ShikaVarObject) GetAttributes() []ShikaObjectAttributeImpl {
+	return shikaVarObject.Attributes
 }
 
-func (shikaObject *ShikaObject) SetAttributes(attributes []ShikaObjectAttributeImpl) {
-	shikaObject.Attributes = attributes
+func (shikaVarObject *ShikaVarObject) SetAttributes(attributes []ShikaObjectAttributeImpl) {
+	shikaVarObject.Attributes = attributes
 }
 
-func (shikaObject *ShikaObject) HasAttributeByName(name string) bool {
-	for i, shikaObjAttr := range shikaObject.Attributes {
+func (shikaVarObject *ShikaVarObject) HasAttributeByName(name string) bool {
+	for i, shikaObjAttr := range shikaVarObject.Attributes {
 		KeepVoid(i, shikaObjAttr)
 
 		if shikaObjAttr.GetName() == name {
@@ -349,19 +378,19 @@ func (shikaObject *ShikaObject) HasAttributeByName(name string) bool {
 	return false
 }
 
-func (shikaObject *ShikaObject) ContainAttributeNames(names ...string) bool {
+func (shikaVarObject *ShikaVarObject) ContainAttributeNames(names ...string) bool {
 	for i, name := range names {
 		KeepVoid(i, name)
 
-		if !shikaObject.HasAttributeByName(name) {
+		if !shikaVarObject.HasAttributeByName(name) {
 			return false
 		}
 	}
 	return true
 }
 
-func (shikaObject *ShikaObject) GetAttributeByName(name string) ShikaObjectAttributeImpl {
-	for i, shikaObjAttr := range shikaObject.Attributes {
+func (shikaVarObject *ShikaVarObject) GetAttributeByName(name string) ShikaObjectAttributeImpl {
+	for i, shikaObjAttr := range shikaVarObject.Attributes {
 		KeepVoid(i, shikaObjAttr)
 
 		if shikaObjAttr.GetName() == name {
@@ -371,24 +400,29 @@ func (shikaObject *ShikaObject) GetAttributeByName(name string) ShikaObjectAttri
 	return nil
 }
 
-func (shikaObject *ShikaObject) SetAttributeByName(name string, attribute ShikaObjectAttributeImpl) {
-	for i, shikaObjAttr := range shikaObject.Attributes {
+func (shikaVarObject *ShikaVarObject) SetAttributeByName(name string, attribute ShikaObjectAttributeImpl) {
+
+	// replace existing attribute
+	for i, shikaObjAttr := range shikaVarObject.Attributes {
 		KeepVoid(i, shikaObjAttr)
 
 		if shikaObjAttr.GetName() == name {
-			shikaObject.Attributes[i] = attribute
+			shikaVarObject.Attributes[i] = attribute
 			return
 		}
 	}
+
+	// create new attribute
+	shikaVarObject.Attributes = append(shikaVarObject.Attributes, attribute)
 }
 
-func (shikaObject *ShikaObject) RemoveAttributeByName(name string) {
-	for i, shikaObjAttr := range shikaObject.Attributes {
+func (shikaVarObject *ShikaVarObject) RemoveAttributeByName(name string) {
+	for i, shikaObjAttr := range shikaVarObject.Attributes {
 		KeepVoid(i, shikaObjAttr)
 
 		if shikaObjAttr.GetName() == name {
 			j := i + 1
-			shikaObject.Attributes = append(shikaObject.Attributes[:i], shikaObject.Attributes[j:]...)
+			shikaVarObject.Attributes = append(shikaVarObject.Attributes[:i], shikaVarObject.Attributes[j:]...)
 			return
 		}
 	}
@@ -418,7 +452,7 @@ func GetShikaObjectPropertyReflection(value any) ShikaObjectPropertyImpl {
 	return nil
 }
 
-func ShikaObjectConversionPreview(obj any) ShikaObjectPropertyImpl {
+func ShikaObjectPropertyConversionPreview(obj any) ShikaObjectPropertyImpl {
 	if obj == nil {
 		return NewShikaObjectProperty(nil, ShikaObjectDataTypeNull)
 	}
@@ -427,34 +461,43 @@ func ShikaObjectConversionPreview(obj any) ShikaObjectPropertyImpl {
 	}
 	val := PassValueIndirectReflection(obj)
 	if !IsValidReflection(val) {
-		return NewShikaObjectProperty(nil, ShikaObjectDataTypeUndefined)
+		return NewShikaObjectProperty(nil, ShikaObjectDataTypeNull)
 	}
 	switch val.Kind() {
 	case reflect.Bool:
-		return NewShikaObjectProperty(val.Bool(), ShikaObjectDataTypeBool)
+		v := val.Bool()
+		return NewShikaObjectProperty(v, ShikaObjectDataTypeBool)
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		return NewShikaObjectProperty(val.Int(), ShikaObjectDataTypeInt64)
-	case reflect.Uint, reflect.Uintptr, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		return NewShikaObjectProperty(val.Uint(), ShikaObjectDataTypeUint64)
+		v := val.Int()
+		return NewShikaObjectProperty(v, ShikaObjectDataTypeInt64)
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		v := val.Uint()
+		return NewShikaObjectProperty(v, ShikaObjectDataTypeUint64)
+	case reflect.Uintptr:
+		v := Unwrap(Cast[uintptr](val.Interface()))
+		return NewShikaObjectProperty(v, ShikaObjectDataTypeUintptr)
 	case reflect.Float32, reflect.Float64:
-		return NewShikaObjectProperty(val.Float(), ShikaObjectDataTypeFloat64)
+		v := val.Float()
+		return NewShikaObjectProperty(v, ShikaObjectDataTypeFloat64)
 	case reflect.Complex64, reflect.Complex128:
-		return NewShikaObjectProperty(val.Complex(), ShikaObjectDataTypeComplex128)
+		v := val.Complex()
+		return NewShikaObjectProperty(v, ShikaObjectDataTypeComplex128)
 	case reflect.String:
-		return NewShikaObjectProperty(val.String(), ShikaObjectDataTypeString)
+		v := val.String()
+		return NewShikaObjectProperty(v, ShikaObjectDataTypeString)
 	case reflect.Struct:
 		if IsShikaObjectPropertyReflection(val) {
 			return GetShikaObjectPropertyReflection(val)
 		}
 
-		if IsDateTimeStringISO8601Reflection(val) {
-			return NewShikaObjectProperty(GetDateTimeStringISO8601Reflection(val), ShikaObjectDataTypeTime)
+		if IsTimeUtcISO8601(val) {
+			return NewShikaObjectProperty(ToTimeUtcStringISO8601(val), ShikaObjectDataTypeTime)
 		}
 
 		// scrape any fields
 		t := val.Type()
 		n := t.NumField()
-		temp := make([]ShikaObjectImpl, 0)
+		temp := make([]ShikaVarObjectImpl, 0)
 		for i := 0; i < n; i++ {
 			sField := t.Field(i)
 			sTag := sField.Tag
@@ -463,7 +506,7 @@ func ShikaObjectConversionPreview(obj any) ShikaObjectPropertyImpl {
 				continue
 			}
 			pName := ToCamelCase(sField.Name)
-			pValue := ShikaObjectConversionPreview(sValue.Interface())
+			pValue := ShikaObjectPropertyConversionPreview(sValue.Interface())
 			if nameTag, ok := sTag.Lookup("name"); ok {
 				pName = nameTag
 			}
@@ -487,16 +530,14 @@ func ShikaObjectConversionPreview(obj any) ShikaObjectPropertyImpl {
 					case "-", "ignore", "ignored":
 						continue
 					case "omitempty", "notnull", "required":
-						if pValue.GetKind() == ShikaObjectDataTypeUndefined ||
-							pValue.GetKind() == ShikaObjectDataTypeNull ||
-							pValue.GetValue() == nil {
+						if !pValue.IsValid() {
 							continue
 						}
 					}
 				}
 			}
 
-			property := NewShikaObject(pName)
+			property := NewShikaVarObject(pName)
 			property.SetOwnProperty(pValue)
 			temp = append(temp, property)
 		}
@@ -506,18 +547,18 @@ func ShikaObjectConversionPreview(obj any) ShikaObjectPropertyImpl {
 		values := make([]ShikaObjectPropertyImpl, size)
 		for i := 0; i < size; i++ {
 			elem := val.Index(i).Interface()
-			values[i] = ShikaObjectConversionPreview(elem)
+			values[i] = ShikaObjectPropertyConversionPreview(elem)
 		}
 		return NewShikaObjectProperty(values, ShikaObjectDataTypeArray)
 	case reflect.Map:
 		size := val.Len()
 		iter := val.MapRange()
-		values := make([]ShikaObjectImpl, size)
+		values := make([]ShikaVarObjectImpl, size)
 		for i := 0; iter.Next(); i++ {
 			key := ToStringReflection(iter.Key())
 			value := iter.Value().Interface()
-			temp := NewShikaObject(key)
-			temp.SetOwnProperty(ShikaObjectConversionPreview(value))
+			temp := NewShikaVarObject(key)
+			temp.SetOwnProperty(ShikaObjectPropertyConversionPreview(value))
 			values[i] = temp
 		}
 		return NewShikaObjectProperty(values, ShikaObjectDataTypeObject)

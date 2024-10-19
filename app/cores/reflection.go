@@ -2,11 +2,8 @@ package cores
 
 import (
 	"fmt"
-	"github.com/golang-jwt/jwt/v5"
 	"reflect"
 	"strconv"
-	"strings"
-	"time"
 )
 
 func EqualsReflection(value, other any) bool {
@@ -149,65 +146,44 @@ func IsExportedFieldByNameReflection(value any, name string) bool {
 	return IsExportedFieldReflection(val.FieldByName(name))
 }
 
-var TimeTypeReflection = reflect.TypeOf(new(time.Time))
-var NumericDateTypeReflection = reflect.TypeOf(new(jwt.NumericDate))
-
-func IsDateTimeStringISO8601Reflection(value any) bool {
-	val := PassValueIndirectReflection(value)
-	if !IsValidReflection(val) {
-		return false
-	}
-	if TypeEqualsReflection(val.Type(), TimeTypeReflection) {
-		return true
-	} else if TypeEqualsReflection(val.Type(), NumericDateTypeReflection) {
-		return true
-	}
-	return false
-}
-
-const (
-	TimeFormatISO8601 = "2006-01-02T15:04:05.000Z07:00"
-)
-
-func GetDateTimeStringISO8601Reflection(value any) string {
-	val := PassValueIndirectReflection(value)
-	if !IsValidReflection(val) {
-		return ""
-	}
-
-	if TypeEqualsReflection(val.Type(), TimeTypeReflection) {
-		t := val.Interface().(time.Time)
-		return t.UTC().Format(TimeFormatISO8601)
-	} else if TypeEqualsReflection(val.Type(), NumericDateTypeReflection) {
-		// why not use a pointer for jwt.NumericDate, because
-		// has already pass value indirect reflection
-		t := val.Interface().(jwt.NumericDate).Time
-		return t.UTC().Format(TimeFormatISO8601)
-	}
-	return ""
-}
-
 func ToStringReflection(value any) string {
+	if value == nil {
+		return "<null>"
+	}
+	
+	if val, ok := value.(StringableImpl); ok {
+		return val.ToString()
+	}
+
 	val := PassValueIndirectReflection(value)
 	if !IsValidReflection(val) {
-		return "<undefined>"
+		return "<null>"
 	}
+
 	switch val.Kind() {
 	case reflect.Bool:
-		return strconv.FormatBool(val.Bool())
+		v := val.Bool()
+		return strconv.FormatBool(v)
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		return strconv.FormatInt(val.Int(), 10)
-	case reflect.Uint, reflect.Uintptr, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		return strconv.FormatUint(val.Uint(), 10)
+		v := val.Int()
+		return strconv.FormatInt(v, 10)
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		v := val.Uint()
+		return strconv.FormatUint(v, 10)
+	case reflect.Uintptr:
+		v := Unwrap(Cast[uintptr](val.Interface()))
+		return ToString(v)
 	case reflect.Float32, reflect.Float64:
-		return strconv.FormatFloat(val.Float(), 'f', -1, 64)
+		v := val.Float()
+		return strconv.FormatFloat(v, 'f', -1, 64)
 	case reflect.Complex64, reflect.Complex128:
-		return strconv.FormatComplex(val.Complex(), 'f', -1, 128)
+		v := val.Complex()
+		return strconv.FormatComplex(v, 'f', -1, 128)
 	case reflect.String:
-		return strconv.Quote(val.String())
+		return val.String()
 	case reflect.Struct:
-		if IsDateTimeStringISO8601Reflection(val) {
-			return strconv.Quote(GetDateTimeStringISO8601Reflection(val))
+		if IsTimeUtcISO8601(val) {
+			return strconv.Quote(ToTimeUtcStringISO8601(val))
 		}
 		return "<struct>"
 	case reflect.Array, reflect.Slice:
@@ -215,148 +191,32 @@ func ToStringReflection(value any) string {
 	case reflect.Map:
 		return "<map>"
 	default:
-		return "<undefined>"
+		return fmt.Sprint(val.Interface())
 	}
 }
 
 func PassBackValueIndirectByInterfaceReflection[T any](value any) T {
-	val := PassValueIndirectReflection(value)
-	if !IsValidReflection(val) {
-		return Default[T]()
+	var ok bool
+	var temp T
+	KeepVoid(ok, temp)
+	val := PassBackAnyValueIndirectByInterfaceReflection(value)
+
+	if val == nil {
+		return temp
 	}
 
-	var t T
-	KeepVoid(t)
-
-	if val.Type() == reflect.TypeOf(t) {
-		return Unwrap(Cast[T](val.Interface()))
+	if temp, ok = Cast[T](val); ok {
+		return temp
 	}
 
 	panic(NewThrow("invalid data type", ErrDataTypeInvalid))
 }
 
 func PassBackAnyValueIndirectByInterfaceReflection(value any) any {
-	return PassBackValueIndirectByInterfaceReflection[any](value)
-}
-
-func JsonPreviewPermuteIndentReflection(obj any, indent int, start int) string {
-	end := start + indent
-	whiteSpaceStart := strings.Repeat(" ", start)
-	whiteSpaceEnd := strings.Repeat(" ", end)
-	if obj == nil {
-		return "null"
-	}
-	if serialize, ok := obj.(JsonableImpl); ok {
-		return serialize.ToJson()
-	}
-	if val, ok := obj.(StringableImpl); ok {
-		return strconv.Quote(val.ToString())
-	}
-	val := PassValueIndirectReflection(obj)
+	val := PassValueIndirectReflection(value)
 	if !IsValidReflection(val) {
-		return "undefined"
+		return nil
 	}
-	switch val.Kind() {
-	case reflect.Bool:
-		return strconv.FormatBool(val.Bool())
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		return strconv.FormatInt(val.Int(), 10)
-	case reflect.Uint, reflect.Uintptr, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		return strconv.FormatUint(val.Uint(), 10)
-	case reflect.Float32, reflect.Float64:
-		return strconv.FormatFloat(val.Float(), 'f', -1, 64)
-	case reflect.Complex64, reflect.Complex128:
-		return strconv.FormatComplex(val.Complex(), 'f', -1, 128)
-	case reflect.String:
-		return strconv.Quote(val.String())
-	case reflect.Struct:
-		if IsDateTimeStringISO8601Reflection(val) {
-			return strconv.Quote(GetDateTimeStringISO8601Reflection(val))
-		}
 
-		// scrape any fields
-		t := val.Type()
-		n := t.NumField()
-		temp := make([]string, 0)
-		for i := 0; i < n; i++ {
-			structField := t.Field(i)
-			structTag := structField.Tag
-			field := val.Field(i)
-			fieldKey := ToCamelCase(structField.Name)
-			fieldValue := "undefined"
-			if IsExportedFieldReflection(field) {
-				fieldValue = JsonPreviewPermuteIndentReflection(field.Interface(), indent, end)
-			}
-			if nameTag, ok := structTag.Lookup("name"); ok {
-				fieldKey = nameTag
-			}
-			if jsonTag, ok := structTag.Lookup("json"); ok {
-				KeepVoid(jsonTag, ok)
-
-				name := ""
-				tokens := strings.Split(jsonTag, ",")
-				size := len(tokens)
-				if size > 0 {
-					name = strings.Trim(tokens[0], " ")
-				}
-
-				if len(name) > 0 && name != "-" {
-					fieldKey = name
-				}
-
-				for j := 1; j < size; j++ {
-					token := strings.Trim(tokens[j], " ")
-					switch token {
-					case "-", "ignore", "ignored":
-						continue
-					case "omitempty", "notnull", "required":
-						if fieldValue == "undefined" ||
-							fieldValue == "null" ||
-							fieldValue == strconv.Quote("") {
-							continue
-						}
-					}
-				}
-			}
-
-			// added
-			entry := whiteSpaceEnd + strconv.Quote(fieldKey) + ": " + fieldValue
-			temp = append(temp, entry)
-		}
-		return "{\n" + strings.Join(temp, ",\n") + "\n" + whiteSpaceStart + "}"
-	case reflect.Array, reflect.Slice:
-		size := val.Len()
-		values := make([]string, size)
-		for i := 0; i < size; i++ {
-			elem := val.Index(i).Interface()
-			values[i] = whiteSpaceEnd + JsonPreviewPermuteIndentReflection(elem, indent, end)
-		}
-		if len(values) > 0 {
-			return "[\n" + strings.Join(values, ",\n") + "\n" + whiteSpaceStart + "]"
-		}
-		return "[]"
-	case reflect.Map:
-		size := val.Len()
-		iter := val.MapRange()
-		values := make([]string, size)
-		for i := 0; iter.Next(); i++ {
-			key := iter.Key().Interface()
-			value := iter.Value().Interface()
-			values[i] = whiteSpaceEnd + strconv.Quote(fmt.Sprint(key)) + ": " + JsonPreviewPermuteIndentReflection(value, indent, end)
-		}
-		if len(values) > 0 {
-			return "{\n" + strings.Join(values, ",\n") + "\n" + whiteSpaceStart + "}"
-		}
-		return "{}"
-	default:
-		return "undefined"
-	}
-}
-
-func JsonPreviewIndentReflection(obj any, indent int) string {
-	return JsonPreviewPermuteIndentReflection(obj, indent, 0)
-}
-
-func JsonPreviewReflection(obj any) string {
-	return JsonPreviewPermuteIndentReflection(obj, 4, 0)
+	return val.Interface()
 }

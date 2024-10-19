@@ -35,9 +35,31 @@ func CopyStack[T any](value []T) []T {
 
 func ToString(value any) string {
 	if value == nil {
-		return ""
+		return "<null>"
 	}
-	return fmt.Sprintf("%v", value)
+
+	if val, ok := value.(StringableImpl); ok {
+		return val.ToString()
+	}
+
+	switch value.(type) {
+	case bool:
+		return fmt.Sprintf("%t", value)
+	case int, int8, int16, int32, int64:
+		return fmt.Sprintf("%d", value)
+	case uint, uint8, uint16, uint32, uint64:
+		return fmt.Sprintf("%d", value)
+	case uintptr:
+		return fmt.Sprintf("0x%016x", value)
+	case float32, float64:
+		return fmt.Sprintf("%f", value)
+	case complex64, complex128:
+		return fmt.Sprintf("%f", value)
+	case string:
+		return value.(string)
+	default:
+		return fmt.Sprint(value)
+	}
 }
 
 type ErrOrOkImpl interface {
@@ -209,13 +231,13 @@ func (m Map[T]) GetValueByKey(key string) T {
 }
 
 func (m Map[T]) SetValueByKey(key string, value T) bool {
-	var ok bool
-	var temp T
-	KeepVoid(ok, temp, value)
-
-	if temp, ok = m[key]; !ok {
-		return false
-	}
+	//var ok bool
+	//var temp T
+	//KeepVoid(ok, temp, value)
+	//
+	//if temp, ok = m[key]; !ok {
+	//	return false
+	//}
 	m[key] = value
 	return true
 }

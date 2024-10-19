@@ -21,7 +21,7 @@ func main() {
 
 	globals.GlobalJwtConfigInit()
 
-	fmt.Println(cores.JsonPreviewReflection(globals.ConfigDefaults))
+	fmt.Println(cores.ShikaYamlEncodePreview(globals.ConfigDefaults))
 
 	//var db *gorm.DB
 	//cores.KeepVoid(db)
