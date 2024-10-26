@@ -13,11 +13,11 @@ func GetTimeUtcNow() time.Time {
 	return time.Now().UTC()
 }
 
-func GetTimeUtcNowTimeStamp() int64 {
+func GetTimeUtcNowTimestamp() int64 {
 	return GetTimeUtcNow().UnixMilli()
 }
 
-func GetTimeUtcByTimeStamp(timeStamp int64) time.Time {
+func GetTimeUtcByTimestamp(timeStamp int64) time.Time {
 	return time.UnixMilli(timeStamp).UTC()
 }
 
@@ -60,19 +60,19 @@ func GetTimeUtcISO8601(value any) (time.Time, error) {
 		return ParseTimeUtcByStringISO8601(v)
 	case int64:
 		v := Unwrap(Cast[int64](value))
-		return GetTimeUtcByTimeStamp(v), nil
+		return GetTimeUtcByTimestamp(v), nil
 	case int32:
 		v := Unwrap(Cast[int32](value))
-		return GetTimeUtcByTimeStamp(int64(v)), nil
+		return GetTimeUtcByTimestamp(int64(v)), nil
 	case int:
 		v := Unwrap(Cast[int](value))
-		return GetTimeUtcByTimeStamp(int64(v)), nil
+		return GetTimeUtcByTimestamp(int64(v)), nil
 	default:
 		return Default[time.Time](), ErrDataTypeInvalid
 	}
 }
 
-func GetTimeUtcFromTimeAnyStrict[V TimeAnyImpl](value V) (time.Time, error) {
+func GetTimeUtcAnyStrict[V TimeAnyImpl](value V) (time.Time, error) {
 	return GetTimeUtcISO8601(value)
 }
 

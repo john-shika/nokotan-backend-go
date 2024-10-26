@@ -11,6 +11,8 @@ const (
 	ShikaObjectDataTypeUndefined ShikaObjectDataTypeKind = iota
 	ShikaObjectDataTypeNull
 	ShikaObjectDataTypeBool
+	ShikaObjectDataTypeInt
+	ShikaObjectDataTypeUint
 	ShikaObjectDataTypeInt8
 	ShikaObjectDataTypeUint8
 	ShikaObjectDataTypeInt16
@@ -45,6 +47,10 @@ func (shikaObjectDataTypeKind ShikaObjectDataTypeKind) ToString() string {
 		return "null"
 	case ShikaObjectDataTypeBool:
 		return "bool"
+	case ShikaObjectDataTypeInt:
+		return "int"
+	case ShikaObjectDataTypeUint:
+		return "uint"
 	case ShikaObjectDataTypeInt8:
 		return "int8"
 	case ShikaObjectDataTypeUint8:
@@ -61,6 +67,8 @@ func (shikaObjectDataTypeKind ShikaObjectDataTypeKind) ToString() string {
 		return "int64"
 	case ShikaObjectDataTypeUint64:
 		return "uint64"
+	case ShikaObjectDataTypeFloat:
+		return "float"
 	case ShikaObjectDataTypeFloat32:
 		return "float32"
 	case ShikaObjectDataTypeFloat64:

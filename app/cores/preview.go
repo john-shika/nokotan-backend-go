@@ -28,6 +28,16 @@ func ShikaJsonEncodeIndentPermutatePreview(shikaObjectProperty ShikaObjectProper
 	case ShikaObjectDataTypeBool:
 		v := Unwrap(Cast[bool](shikaObjectProperty.GetValue()))
 		return strconv.FormatBool(v)
+
+	case ShikaObjectDataTypeInt:
+		// TODO: not implemented yet
+		v := Unwrap(Cast[int](shikaObjectProperty.GetValue()))
+		return strconv.FormatInt(int64(v), 10)
+	case ShikaObjectDataTypeUint:
+		// TODO: not implemented yet
+		v := Unwrap(Cast[uint](shikaObjectProperty.GetValue()))
+		return strconv.FormatUint(uint64(v), 10)
+
 	case ShikaObjectDataTypeInt8:
 		v := Unwrap(Cast[int8](shikaObjectProperty.GetValue()))
 		return strconv.FormatInt(int64(v), 10)
@@ -54,7 +64,13 @@ func ShikaJsonEncodeIndentPermutatePreview(shikaObjectProperty ShikaObjectProper
 		return strconv.FormatUint(v, 10)
 	case ShikaObjectDataTypeUintptr:
 		v := Unwrap(Cast[uintptr](shikaObjectProperty.GetValue()))
-		return ToStringReflection(v)
+		return strconv.Quote(ToStringReflection(v))
+
+	case ShikaObjectDataTypeFloat:
+		// TODO: not implemented yet
+		v := Unwrap(Cast[float64](shikaObjectProperty.GetValue()))
+		return strconv.FormatFloat(v, 'f', -1, 64)
+
 	case ShikaObjectDataTypeFloat32:
 		v := Unwrap(Cast[float32](shikaObjectProperty.GetValue()))
 		return strconv.FormatFloat(float64(v), 'f', -1, 32)
@@ -131,6 +147,11 @@ func ShikaYamlEncodeIndentPermutatePreview(shikaObjectProperty ShikaObjectProper
 	whiteSpaceEnd := strings.Repeat(" ", end)
 	KeepVoid(end, whiteSpaceStart, whiteSpaceEnd)
 
+	header := "---\n"
+	if start > 0 {
+		header = "\n"
+	}
+
 	if shikaObjectProperty == nil {
 		return "undefined"
 	}
@@ -143,6 +164,16 @@ func ShikaYamlEncodeIndentPermutatePreview(shikaObjectProperty ShikaObjectProper
 	case ShikaObjectDataTypeBool:
 		v := Unwrap(Cast[bool](shikaObjectProperty.GetValue()))
 		return strconv.FormatBool(v)
+
+	case ShikaObjectDataTypeInt:
+		// TODO: not implemented yet
+		v := Unwrap(Cast[int](shikaObjectProperty.GetValue()))
+		return strconv.FormatInt(int64(v), 10)
+	case ShikaObjectDataTypeUint:
+		// TODO: not implemented yet
+		v := Unwrap(Cast[uint](shikaObjectProperty.GetValue()))
+		return strconv.FormatUint(uint64(v), 10)
+
 	case ShikaObjectDataTypeInt8:
 		v := Unwrap(Cast[int8](shikaObjectProperty.GetValue()))
 		return strconv.FormatInt(int64(v), 10)
@@ -169,7 +200,13 @@ func ShikaYamlEncodeIndentPermutatePreview(shikaObjectProperty ShikaObjectProper
 		return strconv.FormatUint(v, 10)
 	case ShikaObjectDataTypeUintptr:
 		v := Unwrap(Cast[uintptr](shikaObjectProperty.GetValue()))
-		return ToStringReflection(v)
+		return strconv.Quote(ToStringReflection(v))
+
+	case ShikaObjectDataTypeFloat:
+		// TODO: not implemented yet
+		v := Unwrap(Cast[float64](shikaObjectProperty.GetValue()))
+		return strconv.FormatFloat(v, 'f', -1, 64)
+
 	case ShikaObjectDataTypeFloat32:
 		v := Unwrap(Cast[float32](shikaObjectProperty.GetValue()))
 		return strconv.FormatFloat(float64(v), 'f', -1, 32)
@@ -215,7 +252,7 @@ func ShikaYamlEncodeIndentPermutatePreview(shikaObjectProperty ShikaObjectProper
 			values[i] = whiteSpaceStart + "- " + "undefined"
 		}
 		if len(values) > 0 {
-			return "\n" + strings.Join(values, "\n")
+			return header + strings.Join(values, "\n")
 		}
 		return "[]"
 	case ShikaObjectDataTypeObject:
@@ -229,7 +266,7 @@ func ShikaYamlEncodeIndentPermutatePreview(shikaObjectProperty ShikaObjectProper
 			values[i] = whiteSpaceStart + k + ": " + ShikaYamlEncodeIndentPermutatePreview(v, indent, end)
 		}
 		if len(values) > 0 {
-			return "\n" + strings.Join(values, "\n")
+			return header + strings.Join(values, "\n")
 		}
 		return "{}"
 	case ShikaObjectDataTypeTime:

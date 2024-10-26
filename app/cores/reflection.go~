@@ -199,7 +199,7 @@ func PassValueIndirect[T any](value any) T {
 	var ok bool
 	var temp T
 	KeepVoid(ok, temp)
-	val := PassAnyValueIndirect(value)
+	val := PassBackAnyValueIndirect(value)
 
 	if val == nil {
 		return temp
@@ -212,7 +212,7 @@ func PassValueIndirect[T any](value any) T {
 	panic(NewThrow("invalid data type", ErrDataTypeInvalid))
 }
 
-func PassAnyValueIndirect(value any) any {
+func PassBackAnyValueIndirect(value any) any {
 	val := PassValueIndirectReflection(value)
 	if !IsValidReflection(val) {
 		return nil

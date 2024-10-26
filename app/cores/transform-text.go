@@ -11,14 +11,19 @@ func ToTitleCase(value string) string {
 		return EmptyString
 	}
 
-	temp := RegexReplaceAllString("([A-Z])", strings.TrimSpace(value), " $1")
+	temp := RegexReplaceAllString("([a-z])([A-Z])", strings.TrimSpace(value), "$1 $2")
+	temp = RegexReplaceAllString("([a-zA-Z])([0-9])", temp, "$1 $2")
+	temp = RegexReplaceAllString("([0-9])([a-zA-Z])", temp, "$1 $2")
 	temp = RegexReplaceAllString("[-_\\s]+", temp, " ")
+
+	// lol
+	//temp = RegexReplaceAllString("\\b\\w", temp, strings.ToUpper("$0"))
 
 	transform := cases.Title(language.English)
 	return transform.String(strings.ToLower(temp))
 }
 
-func ToStartCharUpper(value string) string {
+func ToUpperStart(value string) string {
 	size := len(value)
 	switch size {
 	case 0:
@@ -30,7 +35,7 @@ func ToStartCharUpper(value string) string {
 	}
 }
 
-func ToStartCharLower(value string) string {
+func ToLowerStart(value string) string {
 	size := len(value)
 	switch size {
 	case 0:
@@ -45,12 +50,13 @@ func ToStartCharLower(value string) string {
 func ToPascalCase(value string) string {
 	temp := ToTitleCase(value)
 	temp = strings.ReplaceAll(temp, " ", "")
-	return ToStartCharUpper(temp)
+	return ToUpperStart(temp)
 }
 
 func ToCamelCase(value string) string {
-	temp := ToPascalCase(value)
-	return ToStartCharLower(temp)
+	temp := ToTitleCase(value)
+	temp = strings.ReplaceAll(temp, " ", "")
+	return ToLowerStart(temp)
 }
 
 func ToSnakeCaseRaw(value string) string {
@@ -58,7 +64,9 @@ func ToSnakeCaseRaw(value string) string {
 		return EmptyString
 	}
 
-	temp := RegexReplaceAllString("([A-Z])", strings.TrimSpace(value), "_$1")
+	temp := RegexReplaceAllString("([a-z])([A-Z])", strings.TrimSpace(value), "$1_$2")
+	temp = RegexReplaceAllString("([a-zA-Z])([0-9])", temp, "$1_$2")
+	temp = RegexReplaceAllString("([0-9])([a-zA-Z])", temp, "$1_$2")
 	temp = RegexReplaceAllString("[-_\\s]+", temp, "_")
 
 	return temp
@@ -79,7 +87,9 @@ func ToKebabCaseRaw(value string) string {
 		return EmptyString
 	}
 
-	temp := RegexReplaceAllString("([A-Z])", strings.TrimSpace(value), "-$1")
+	temp := RegexReplaceAllString("([a-z])([A-Z])", strings.TrimSpace(value), "$1-$2")
+	temp = RegexReplaceAllString("([a-zA-Z])([0-9])", temp, "$1-$2")
+	temp = RegexReplaceAllString("([0-9])([a-zA-Z])", temp, "$1-$2")
 	temp = RegexReplaceAllString("[-_\\s]+", temp, "-")
 
 	return temp

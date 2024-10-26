@@ -78,9 +78,9 @@ func GetTimeUtcFromAny(value any) time.Time {
 	case string:
 		return Unwrap(ParseTimeUtcByStringISO8601(value.(string)))
 	case int64:
-		return GetTimeUtcByTimeStamp(value.(int64))
+		return GetTimeUtcByTimestamp(value.(int64))
 	case int:
-		return GetTimeUtcByTimeStamp(int64(value.(int)))
+		return GetTimeUtcByTimestamp(int64(value.(int)))
 	default:
 		return Default[time.Time]()
 	}
@@ -106,10 +106,10 @@ func GetJwtNumericDateFromAny(value any) *jwt.NumericDate {
 		t := Unwrap(ParseTimeUtcByStringISO8601(value.(string)))
 		return jwt.NewNumericDate(t)
 	case int64:
-		t := GetTimeUtcByTimeStamp(value.(int64))
+		t := GetTimeUtcByTimestamp(value.(int64))
 		return jwt.NewNumericDate(t)
 	case int:
-		t := GetTimeUtcByTimeStamp(int64(value.(int)))
+		t := GetTimeUtcByTimestamp(int64(value.(int)))
 		return jwt.NewNumericDate(t)
 	default:
 		return nil

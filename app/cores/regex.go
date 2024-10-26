@@ -3,18 +3,29 @@ package cores
 import "regexp"
 
 type ReOrStrImpl interface {
-	~string | *regexp.Regexp
+	string | *regexp.Regexp
+}
+
+var globals = make(map[string]*regexp.Regexp)
+
+func GetRegexGlobal(pattern string) *regexp.Regexp {
+	if re, ok := globals[pattern]; ok {
+		return re
+	}
+	re := regexp.MustCompile(pattern)
+	globals[pattern] = re
+	return re
 }
 
 func GetRegexPattern[T ReOrStrImpl](pattern T) *regexp.Regexp {
 	var ok bool
 	var re *regexp.Regexp
-	var reStr string
+	var temp string
 	if re, ok = CastPtr[regexp.Regexp](pattern); !ok {
-		if reStr, ok = Cast[string](pattern); !ok {
+		if temp, ok = Cast[string](pattern); !ok {
 			panic("pattern must be 'regexp.Regexp' or string type")
 		}
-		re = regexp.MustCompile(reStr)
+		re = GetRegexGlobal(temp)
 	}
 	return re
 }
