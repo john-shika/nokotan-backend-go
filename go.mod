@@ -1,4 +1,4 @@
-module example
+module nokotan
 
 go 1.23.0
 
