@@ -1,15 +1,15 @@
 package middlewares
 
 import (
-	"example/app/cores"
-	"example/app/cores/extras"
-	"example/app/cores/schemas"
-	"example/app/globals"
-	"example/app/models"
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 	"net/http"
+	"nokowebapi/cores"
+	"nokowebapi/cores/extras"
+	"nokowebapi/cores/schemas"
+	"nokowebapi/globals"
+	"nokowebapi/models"
 	"time"
 )
 

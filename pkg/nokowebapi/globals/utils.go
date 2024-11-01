@@ -1,9 +1,9 @@
 package globals
 
 import (
-	"example/app/cores"
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
+	"nokowebapi/cores"
 	"strings"
 )
 

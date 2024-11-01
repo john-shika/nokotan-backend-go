@@ -1,8 +1,8 @@
 package extras
 
 import (
-	"example/app/cores"
 	"github.com/labstack/echo/v4"
+	"nokowebapi/cores"
 	"strings"
 )
 
@@ -26,17 +26,20 @@ type RouterImpl interface {
 
 func GetJwtToken(c echo.Context) (string, error) {
 	var ok bool
-	var err error
 	var token string
-	var jwtToken cores.JwtTokenImpl
+	cores.KeepVoid(ok, token)
+
 	if token = strings.Trim(c.Request().Header.Get("Authorization"), " "); token == "" {
-		return nil, cores.ErrJwtTokenNotFound
+		return "", cores.ErrJwtTokenNotFound
 	}
+
 	if token, ok = strings.CutPrefix(token, "Bearer "); !ok {
 		return "", cores.ErrJwtTokenNotFound
 	}
+
 	if token = strings.Trim(token, " "); token == "" {
 		return "", cores.ErrJwtTokenNotFound
 	}
-	return token
+
+	return token, nil
 }

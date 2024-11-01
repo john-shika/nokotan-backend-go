@@ -1,15 +1,15 @@
 package main
 
 import (
-	"example/app/cores"
-	"example/app/globals"
 	"fmt"
 	"github.com/spf13/viper"
+	cores2 "nokowebapi/cores"
+	globals2 "nokowebapi/globals"
 )
 
 func main() {
 	var err error
-	cores.KeepVoid(err)
+	cores2.KeepVoid(err)
 
 	viper.SetConfigFile("config.yaml")
 	viper.SetConfigType("yaml")
@@ -19,9 +19,9 @@ func main() {
 		panic(fmt.Errorf("fatal error config file: %w", err))
 	}
 
-	globals.GlobalJwtConfigInit()
+	globals2.GlobalJwtConfigInit()
 
-	fmt.Println(cores.ShikaYamlEncodePreview(globals.ConfigDefaults))
+	fmt.Println(cores2.ShikaYamlEncodePreview(globals2.ConfigDefaults))
 
 	//var db *gorm.DB
 	//cores.KeepVoid(db)

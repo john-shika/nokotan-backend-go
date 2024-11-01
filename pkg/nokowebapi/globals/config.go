@@ -1,7 +1,7 @@
 package globals
 
 import (
-	"example/app/cores"
+	"nokowebapi/cores"
 )
 
 var ConfigDefaults = cores.MapAny{

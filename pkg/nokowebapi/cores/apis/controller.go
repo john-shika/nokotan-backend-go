@@ -1,9 +1,9 @@
 package apis
 
 import (
-	"example/app/cores/extras"
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
+	"nokowebapi/cores/extras"
 )
 
 // BaseControllerImpl interface for a defined router as extras.RouterImpl and database with gorm.DB

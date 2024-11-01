@@ -1,6 +1,6 @@
 package schemas
 
-import "example/app/cores"
+import "nokowebapi/cores"
 
 type MessageBody struct {
 	StatusOk   bool   `json:"statusOk,required"`
