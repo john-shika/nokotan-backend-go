@@ -81,7 +81,7 @@ func LoggerConfigGlobals() *LoggerConfig {
 	}
 
 	keyName := cores.ToCamelCase(cores.GetName(loggerConfig))
-	config := ConfigDefaults.GetValueByKey(keyName).(cores.MapAny)
+	config := cores.Unwrap(cores.Cast[cores.MapAny](ConfigDefaults.GetValueByKey(keyName)))
 
 	config.SetValueByKey("development", loggerConfig.Development)
 	config.SetValueByKey("level", loggerConfig.Level)
@@ -94,7 +94,7 @@ func LoggerConfigGlobals() *LoggerConfig {
 func GetLoggerConfigGlobals() *LoggerConfig {
 	loggerConfig := NewLoggerConfig()
 	keyName := cores.ToCamelCase(cores.GetName(loggerConfig))
-	config := ConfigDefaults.GetValueByKey(keyName).(cores.MapAny)
+	config := cores.Unwrap(cores.Cast[cores.MapAny](ConfigDefaults.GetValueByKey(keyName)))
 
 	loggerConfig.Development = config.GetValueByKey("development").(bool)
 	loggerConfig.Level = config.GetValueByKey("level").(string)

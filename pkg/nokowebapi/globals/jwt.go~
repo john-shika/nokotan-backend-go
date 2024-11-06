@@ -17,7 +17,7 @@ func JwtConfigGlobals() *cores.JwtConfig {
 	}
 
 	keyName := cores.ToCamelCase(cores.GetName(jwtConfig))
-	config := ConfigDefaults.GetValueByKey(keyName).(cores.MapAny)
+	config := cores.Unwrap(cores.Cast[cores.MapAny](ConfigDefaults.GetValueByKey(keyName)))
 
 	config.SetValueByKey("algorithm", jwtConfig.Algorithm)
 	config.SetValueByKey("audience", jwtConfig.Audience)
@@ -59,7 +59,7 @@ func GetJwtConfigGlobals() *cores.JwtConfig {
 	jwtConfig := cores.NewJwtConfig()
 
 	keyName := cores.ToCamelCase(cores.GetName(jwtConfig))
-	config := ConfigDefaults.GetValueByKey(keyName).(cores.MapAny)
+	config := cores.Unwrap(cores.Cast[cores.MapAny](ConfigDefaults.GetValueByKey(keyName)))
 
 	jwtConfig.Algorithm = config.GetValueByKey("algorithm").(string)
 	jwtConfig.Audience = config.GetValueByKey("audience").(string)
