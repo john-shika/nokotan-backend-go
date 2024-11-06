@@ -69,65 +69,49 @@ type ErrOrOkImpl interface {
 func IsOk[T ErrOrOkImpl](eOk T) bool {
 	var ok bool
 	var bOk bool
-	var temp any
-	KeepVoid(ok, bOk, temp)
+	KeepVoid(ok, bOk)
 
-	if temp, ok = CastAny(eOk); !ok {
-		return false
+	if bOk, ok = CastBool(eOk); ok {
+		return bOk
 	}
 
-	if bOk, ok = CastBool(temp); !ok {
-		return false
-	}
-
-	return bOk
+	return false
 }
 
 func IsErr[T ErrOrOkImpl](eOk T) bool {
 	var ok bool
 	var err error
-	var temp any
-	KeepVoid(ok, err, temp)
+	KeepVoid(ok, err)
 
-	if temp, ok = CastAny(eOk); !ok {
-		return false
+	if err, ok = CastErr(eOk); ok {
+		return err != nil
 	}
 
-	if err, ok = CastErr(temp); !ok {
-		return false
-	}
-
-	return err != nil
+	return false
 }
 
-func CastErr[E ErrOrOkImpl](eOk E) (error, bool) {
+func CastErr[T ErrOrOkImpl](eOk T) (error, bool) {
 	var ok bool
 	var err error
-	var temp any
-	KeepVoid(ok, err, temp)
+	KeepVoid(ok, err)
 
-	if temp, ok = CastAny(eOk); !ok {
-		return nil, false
+	if err, ok = Cast[error](eOk); ok {
+		return err, true
 	}
 
-	if err, ok = temp.(error); !ok {
-		return nil, false
-	}
+	return nil, false
+}
 
-	return err, true
+func IsNone(value any) bool {
+	return value == nil
 }
 
 func Unwrap[T any, E ErrOrOkImpl](result T, eOk E) T {
 	var ok bool
 	var err error
-	var temp any
-	KeepVoid(ok, err, temp)
+	KeepVoid(ok, err)
 
-	if temp, ok = CastAny(eOk); !ok {
-		panic(NewThrow("invalid data type", ErrDataTypeInvalid))
-	}
-
-	if temp == nil {
+	if IsNone(eOk) {
 		return result
 	}
 
