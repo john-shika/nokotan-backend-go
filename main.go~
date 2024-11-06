@@ -32,7 +32,9 @@ func main() {
 
 	console.Warn("This is warning message.", zap.Int("EXIT_CODE", cores.EXIT_FAILURE))
 
-	console.ErrorExit("This is error message.", zap.Int("EXIT_CODE", cores.EXIT_FAILURE))
+	console.Fatal("This is error message.", zap.Int("EXIT_CODE", cores.EXIT_FAILURE))
+
+	fmt.Println(12)
 
 	//var db *gorm.DB
 	//cores.KeepVoid(db)

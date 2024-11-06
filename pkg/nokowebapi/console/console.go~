@@ -15,6 +15,15 @@ var Stderr io.Writer = os.Stderr
 var WriterSyncer zapcore.WriteSyncer
 
 var Logger *zap.Logger
+var Locker cores.LockerImpl
+
+func GetLocker() cores.LockerImpl {
+	if Locker != nil {
+		return Locker
+	}
+	Locker = cores.NewLocker()
+	return Locker
+}
 
 func NewWriterSyncer(stdout io.Writer) zapcore.WriteSyncer {
 	var ok bool
@@ -60,21 +69,28 @@ func makeLogger() *zap.Logger {
 }
 
 func NewLogger() *zap.Logger {
-	if Logger == nil {
-		Logger = makeLogger()
+	if Logger != nil {
+		return Logger
 	}
+	Logger = makeLogger()
 	return Logger
 }
 
 func Dir(m cores.MapAnyImpl, fields ...zap.Field) {
-	logger := NewLogger()
-	data := "\n" + cores.ShikaYamlEncodePreview(m)
-	logger.Info(data, fields...)
+	locker := GetLocker()
+	locker.Lock(func() {
+		logger := NewLogger()
+		data := "\n" + cores.ShikaYamlEncodePreview(m)
+		logger.Info(data, fields...)
+	})
 }
 
 func Log(msg string, fields ...zap.Field) {
-	logger := NewLogger()
-	logger.Info(msg, fields...)
+	locker := GetLocker()
+	locker.Lock(func() {
+		logger := NewLogger()
+		logger.Info(msg, fields...)
+	})
 }
 
 func Warn(msg string, fields ...zap.Field) {
@@ -87,7 +103,7 @@ func Error(msg string, fields ...zap.Field) {
 		WriterSyncer = nil
 		NewWriterSyncer(Stdout)
 	}()
-	
+
 	WriterSyncer = nil
 	NewWriterSyncer(Stderr)
 
@@ -96,8 +112,6 @@ func Error(msg string, fields ...zap.Field) {
 }
 
 func Fatal(msg string, fields ...zap.Field) {
-	defer os.Exit(cores.EXIT_FAILURE)
-
 	defer func() {
 		WriterSyncer = nil
 		NewWriterSyncer(Stdout)
