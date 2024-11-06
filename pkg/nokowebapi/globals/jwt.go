@@ -16,7 +16,7 @@ func JwtConfigGlobals() *cores.JwtConfig {
 		panic(fmt.Errorf("fatal error config file: %w", err))
 	}
 
-	keyName := cores.ToCamelCase(cores.GetNameReflection(jwtConfig))
+	keyName := cores.ToCamelCase(cores.GetName(jwtConfig))
 	config := cores.Unwrap(cores.Cast[cores.MapAny](ConfigDefaults.GetValueByKey(keyName)))
 
 	config.SetValueByKey("algorithm", jwtConfig.Algorithm)
@@ -58,7 +58,7 @@ func JwtConfigGlobals() *cores.JwtConfig {
 func GetJwtConfigGlobals() *cores.JwtConfig {
 	jwtConfig := cores.NewJwtConfig()
 
-	keyName := cores.ToCamelCase(cores.GetNameReflection(jwtConfig))
+	keyName := cores.ToCamelCase(cores.GetName(jwtConfig))
 	config := cores.Unwrap(cores.Cast[cores.MapAny](ConfigDefaults.GetValueByKey(keyName)))
 
 	jwtConfig.Algorithm = config.GetValueByKey("algorithm").(string)

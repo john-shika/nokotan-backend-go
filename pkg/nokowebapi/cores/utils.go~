@@ -126,3 +126,17 @@ func EnsureDirAndFile(filePath string) error {
 
 	return nil
 }
+
+func GetName(obj any) string {
+	var ok bool
+	var nameable NameableImpl
+	KeepVoid(ok, nameable)
+
+	// try cast nameable and call method
+	if nameable, ok = obj.(NameableImpl); ok {
+		return nameable.GetName()
+	}
+
+	// print type name by sprintf
+	return fmt.Sprintf("%T", obj)
+}

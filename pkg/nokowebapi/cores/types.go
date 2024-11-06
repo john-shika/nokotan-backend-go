@@ -57,16 +57,8 @@ type JsonableImpl interface {
 	ToJson() string
 }
 
-type YamlableImpl interface {
-	ToYaml() string
-}
-
-type TomlableImpl interface {
-	ToToml() string
-}
-
-type XamlableImpl interface {
-	ToXaml() string
+type NameableImpl interface {
+	GetName() string
 }
 
 type BigFloatImpl interface {

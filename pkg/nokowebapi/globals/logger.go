@@ -63,7 +63,7 @@ func ViperLoggerConfigUnmarshal() (*LoggerConfig, error) {
 	cores.KeepVoid(err)
 
 	loggerConfig := NewLoggerConfig()
-	keyName := cores.ToSnakeCase(cores.GetNameReflection(loggerConfig))
+	keyName := cores.ToSnakeCase(cores.GetName(loggerConfig))
 	if err = viper.UnmarshalKey(keyName, loggerConfig); err != nil {
 		return nil, err
 	}
@@ -80,7 +80,7 @@ func LoggerConfigGlobals() *LoggerConfig {
 		panic(fmt.Errorf("fatal error config file: %w", err))
 	}
 
-	keyName := cores.ToCamelCase(cores.GetNameReflection(loggerConfig))
+	keyName := cores.ToCamelCase(cores.GetName(loggerConfig))
 	config := cores.Unwrap(cores.Cast[cores.MapAny](ConfigDefaults[keyName]))
 
 	config.SetValueByKey("development", loggerConfig.Development)
@@ -93,7 +93,7 @@ func LoggerConfigGlobals() *LoggerConfig {
 
 func GetLoggerConfigGlobals() *LoggerConfig {
 	loggerConfig := NewLoggerConfig()
-	keyName := cores.ToCamelCase(cores.GetNameReflection(loggerConfig))
+	keyName := cores.ToCamelCase(cores.GetName(loggerConfig))
 	config := cores.Unwrap(cores.Cast[cores.MapAny](ConfigDefaults[keyName]))
 
 	loggerConfig.Development = cores.Unwrap(cores.CastBool(config.GetValueByKey("development")))

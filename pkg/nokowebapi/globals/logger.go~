@@ -32,6 +32,8 @@ func GetLoggerConfigLevel(loggerConfig *LoggerConfig) zapcore.Level {
 		return zapcore.WarnLevel
 	case "error":
 		return zapcore.ErrorLevel
+	case "fatal":
+		return zapcore.FatalLevel
 	default:
 		return zapcore.DebugLevel
 	}

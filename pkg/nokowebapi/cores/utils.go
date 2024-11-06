@@ -86,7 +86,7 @@ func ViperJwtConfigUnmarshal() (*JwtConfig, error) {
 	KeepVoid(err)
 
 	jwtConfig := NewJwtConfig()
-	keyName := ToSnakeCase(GetNameReflection(jwtConfig))
+	keyName := ToSnakeCase(GetName(jwtConfig))
 	if err = viper.UnmarshalKey(keyName, jwtConfig); err != nil {
 		return nil, err
 	}
@@ -128,5 +128,15 @@ func EnsureDirAndFile(filePath string) error {
 }
 
 func GetName(obj any) string {
+	var ok bool
+	var nameable NameableImpl
+	KeepVoid(ok, nameable)
+
+	// try cast nameable and call method
+	if nameable, ok = obj.(NameableImpl); ok {
+		return nameable.GetName()
+	}
+
+	// print type name by sprintf
 	return fmt.Sprintf("%T", obj)
 }
