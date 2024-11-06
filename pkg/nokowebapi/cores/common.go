@@ -95,6 +95,10 @@ func CastErr[T ErrOrOkImpl](eOk T) (error, bool) {
 	var err error
 	KeepVoid(ok, err)
 
+	if IsNone(eOk) {
+		return nil, true
+	}
+
 	if err, ok = Cast[error](eOk); ok {
 		return err, true
 	}

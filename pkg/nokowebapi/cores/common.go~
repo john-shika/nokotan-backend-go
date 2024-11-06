@@ -103,7 +103,7 @@ func CastErr[T ErrOrOkImpl](eOk T) (error, bool) {
 }
 
 func IsNone(value any) bool {
-	return temp == nil
+	return value == nil
 }
 
 func Unwrap[T any, E ErrOrOkImpl](result T, eOk E) T {
