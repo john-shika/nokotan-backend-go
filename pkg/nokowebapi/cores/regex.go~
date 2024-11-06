@@ -10,7 +10,7 @@ type ReOrStrImpl interface {
 
 var globals = make(map[string]*regexp.Regexp)
 
-func GetRegexGlobals(pattern string) *regexp.Regexp {
+func GetRegexGlobal(pattern string) *regexp.Regexp {
 	var ok bool
 	var re *regexp.Regexp
 	if re, ok = globals[pattern]; !ok {
@@ -29,7 +29,7 @@ func GetRegexPattern[T ReOrStrImpl](pattern T) *regexp.Regexp {
 		if temp, ok = Cast[string](pattern); !ok {
 			panic("pattern must be 'regexp.Regexp' or string type")
 		}
-		re = GetRegexGlobals(temp)
+		re = GetRegexGlobal(temp)
 	}
 	return re
 }

@@ -12,4 +12,16 @@ var ConfigDefaults = cores.MapAny{
 		"secretKey": "your-secret-key",
 		"expiresIn": "1h",
 	},
+	"logger": cores.MapAny{
+		"development": true,
+		"encoding":     "console",
+		"level":       "debug",
+	},
+}
+
+func Globals() []any {
+	return []any{
+		JwtConfigGlobals(),
+		LoggerConfigGlobals(),
+	}
 }

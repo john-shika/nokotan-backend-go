@@ -60,7 +60,7 @@ func ToCamelCase(value string) string {
 
 func ToSnakeCaseRaw(value string) string {
 	temp := ToTitleCase(value)
-	temp = strings.ReplaceAll(strings.ToLower(temp), " ", "_")
+	temp = strings.ReplaceAll(temp, " ", "_")
 	return temp
 }
 
@@ -76,7 +76,7 @@ func ToSnakeCaseUpper(value string) string {
 
 func ToKebabCaseRaw(value string) string {
 	temp := ToTitleCase(value)
-	temp = strings.ReplaceAll(strings.ToLower(temp), " ", "-")
+	temp = strings.ReplaceAll(temp, " ", "-")
 	return temp
 }
 

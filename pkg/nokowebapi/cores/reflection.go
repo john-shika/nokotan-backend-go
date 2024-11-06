@@ -220,3 +220,21 @@ func PassAnyValueIndirect(value any) any {
 
 	return val.Interface()
 }
+
+func GetNameReflection(value any) string {
+	val := PassValueIndirectReflection(value)
+	if !IsValidReflection(val) {
+		panic("invalid value")
+	}
+	method := val.MethodByName("GetName")
+	if method.IsValid() {
+		results := method.Call(nil)
+		if len(results) != 1 || !results[0].IsValid() {
+			panic("invalid results")
+		}
+		name := Unwrap(CastString(results[0].Interface()))
+		return name
+	}
+
+	return val.Type().Name()
+}

@@ -1,0 +1,111 @@
+package console
+
+import (
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	"io"
+	"nokowebapi/cores"
+	"nokowebapi/globals"
+	"os"
+)
+
+var Stdin io.Reader = os.Stdin
+var Stdout io.Writer = os.Stdout
+var Stderr io.Writer = os.Stderr
+var WriterSyncer zapcore.WriteSyncer
+
+var Logger *zap.Logger
+
+func NewWriterSyncer(stdout io.Writer) zapcore.WriteSyncer {
+	var ok bool
+
+	if WriterSyncer != nil {
+		return WriterSyncer
+	}
+
+	if stdout, ok = stdout.(zapcore.WriteSyncer); ok {
+		WriterSyncer = zapcore.Lock(stdout.(zapcore.WriteSyncer))
+	} else {
+		WriterSyncer = zapcore.AddSync(stdout)
+	}
+
+	return WriterSyncer
+}
+
+func makeLogger() *zap.Logger {
+	var logger *zap.Logger
+
+	loggerConfig := globals.GetLoggerConfigGlobals()
+
+	level := globals.GetLoggerConfigLevel(loggerConfig)
+	option := zap.IncreaseLevel(level)
+
+	writerSyncer := NewWriterSyncer(Stdout)
+
+	if loggerConfig.Development {
+		encoderConfig := zap.NewProductionEncoderConfig()
+		encoder := globals.GetLoggerConfigEncoder(loggerConfig, encoderConfig)
+		core := zapcore.NewCore(encoder, writerSyncer, level)
+		logger = zap.New(core, zap.AddCaller(), option)
+	} else {
+		encoderConfig := zap.NewDevelopmentEncoderConfig()
+		encoder := globals.GetLoggerConfigEncoder(loggerConfig, encoderConfig)
+		core := zapcore.NewCore(encoder, writerSyncer, level)
+		logger = zap.New(core, zap.AddCaller(), option)
+	}
+
+	logger = logger.Named("console")
+	zap.ReplaceGlobals(logger)
+	return logger
+}
+
+func NewLogger() *zap.Logger {
+	if Logger == nil {
+		Logger = makeLogger()
+	}
+	return Logger
+}
+
+func Dir(m cores.MapAnyImpl, fields ...zap.Field) {
+	logger := NewLogger()
+	data := "\n" + cores.ShikaYamlEncodePreview(m)
+	logger.Info(data, fields...)
+}
+
+func Log(msg string, fields ...zap.Field) {
+	logger := NewLogger()
+	logger.Info(msg, fields...)
+}
+
+func Warn(msg string, fields ...zap.Field) {
+	logger := NewLogger()
+	logger.Warn(msg, fields...)
+}
+
+func Error(msg string, fields ...zap.Field) {
+	defer func() {
+		WriterSyncer = nil
+		NewWriterSyncer(Stdout)
+	}()
+	
+	WriterSyncer = nil
+	NewWriterSyncer(Stderr)
+
+	logger := NewLogger()
+	logger.Error(msg, fields...)
+}
+
+func Fatal(msg string, fields ...zap.Field) {
+	defer os.Exit(cores.EXIT_FAILURE)
+
+	defer func() {
+		WriterSyncer = nil
+		NewWriterSyncer(Stdout)
+	}()
+
+	WriterSyncer = nil
+	NewWriterSyncer(Stderr)
+
+	logger := NewLogger()
+	logger.Fatal(msg, fields...)
+}

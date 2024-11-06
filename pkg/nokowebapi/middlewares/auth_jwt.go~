@@ -30,7 +30,7 @@ func AuthJWT(db *gorm.DB) echo.MiddlewareFunc {
 				return c.JSON(http.StatusUnauthorized, schemas.NewMessageBodyUnauthorized(err.Error(), nil))
 			}
 
-			jwtConfig := globals.GetJwtConfigGlobals()
+			jwtConfig := globals.GetGlobalJwtConfig()
 			secretKey := jwtConfig.SecretKey
 			if jwtToken, err = cores.ParseJwtToken(token, secretKey); err != nil {
 				return c.JSON(http.StatusUnauthorized, schemas.NewMessageBodyUnauthorized(err.Error(), nil))

@@ -87,6 +87,7 @@ func ViperJwtConfigUnmarshal() (*JwtConfig, error) {
 
 	jwtConfig := NewJwtConfig()
 	keyName := ToSnakeCase(GetNameReflection(jwtConfig))
+	fmt.Println(keyName)
 	if err = viper.UnmarshalKey(keyName, jwtConfig); err != nil {
 		return nil, err
 	}

@@ -3,6 +3,9 @@ package main
 import (
 	"fmt"
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
+	"nokotan/app"
+	"nokowebapi/console"
 	"nokowebapi/cores"
 	"nokowebapi/globals"
 )
@@ -19,9 +22,17 @@ func main() {
 		panic(fmt.Errorf("fatal error config file: %w", err))
 	}
 
-	globals.GlobalJwtConfigInit()
+	globals.Globals()
 
 	fmt.Println(cores.ShikaYamlEncodePreview(globals.ConfigDefaults))
+
+	console.NewLogger()
+
+	console.Dir(globals.ConfigDefaults)
+
+	console.Warn("This is warning message.", zap.Int("EXIT_CODE", cores.EXIT_FAILURE))
+
+	console.Fatal("This is error message.", zap.Int("EXIT_CODE", cores.EXIT_FAILURE))
 
 	//var db *gorm.DB
 	//cores.KeepVoid(db)
@@ -71,4 +82,6 @@ func main() {
 	//if err = e.Start(":8080"); err != nil {
 	//	e.Logger.Fatal(err)
 	//}
+
+	cores.ApplyMainFunc(app.Main)
 }

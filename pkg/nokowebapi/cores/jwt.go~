@@ -37,7 +37,7 @@ func NewJwtConfig() *JwtConfig {
 	return new(JwtConfig)
 }
 
-func (JwtConfig) GetName() string {
+func (*JwtConfig) GetName() string {
 	return "jwtSettings"
 }
 

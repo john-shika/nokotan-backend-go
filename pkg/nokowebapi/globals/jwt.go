@@ -7,21 +7,23 @@ import (
 	"strings"
 )
 
-func GlobalJwtConfigInit() *cores.JwtConfig {
+func JwtConfigGlobals() *cores.JwtConfig {
 	var err error
 	var jwtConfig *cores.JwtConfig
 	cores.KeepVoid(err, jwtConfig)
 
-	if jwtConfig, err = cores.ViperJwtConfigUnmarshal("jwt_auth"); err != nil {
+	if jwtConfig, err = cores.ViperJwtConfigUnmarshal(); err != nil {
 		panic(fmt.Errorf("fatal error config file: %w", err))
 	}
 
-	jwtSettings := cores.Unwrap(cores.Cast[cores.MapAny](ConfigDefaults["jwtSettings"]))
-	jwtSettings.SetValueByKey("algorithm", jwtConfig.Algorithm)
-	jwtSettings.SetValueByKey("audience", jwtConfig.Audience)
-	jwtSettings.SetValueByKey("issuer", jwtConfig.Issuer)
-	jwtSettings.SetValueByKey("secretKey", jwtConfig.SecretKey)
-	jwtSettings.SetValueByKey("expiresIn", jwtConfig.ExpiresIn)
+	keyName := cores.ToCamelCase(cores.GetNameReflection(jwtConfig))
+	config := cores.Unwrap(cores.Cast[cores.MapAny](ConfigDefaults.GetValueByKey(keyName)))
+
+	config.SetValueByKey("algorithm", jwtConfig.Algorithm)
+	config.SetValueByKey("audience", jwtConfig.Audience)
+	config.SetValueByKey("issuer", jwtConfig.Issuer)
+	config.SetValueByKey("secretKey", jwtConfig.SecretKey)
+	config.SetValueByKey("expiresIn", jwtConfig.ExpiresIn)
 
 	switch strings.ToUpper(jwtConfig.Algorithm) {
 	case "ES256":
@@ -53,15 +55,17 @@ func GlobalJwtConfigInit() *cores.JwtConfig {
 	return jwtConfig
 }
 
-func GetGlobalJwtConfig() *cores.JwtConfig {
+func GetJwtConfigGlobals() *cores.JwtConfig {
 	jwtConfig := cores.NewJwtConfig()
-	jwtSettings := cores.Unwrap(cores.Cast[cores.MapAny](ConfigDefaults["jwtSettings"]))
 
-	jwtConfig.Algorithm = jwtSettings.GetValueByKey("algorithm").(string)
-	jwtConfig.Audience = jwtSettings.GetValueByKey("audience").(string)
-	jwtConfig.Issuer = jwtSettings.GetValueByKey("issuer").(string)
-	jwtConfig.SecretKey = jwtSettings.GetValueByKey("secretKey").(string)
-	jwtConfig.ExpiresIn = jwtSettings.GetValueByKey("expiresIn").(string)
+	keyName := cores.ToCamelCase(cores.GetNameReflection(jwtConfig))
+	config := cores.Unwrap(cores.Cast[cores.MapAny](ConfigDefaults.GetValueByKey(keyName)))
+
+	jwtConfig.Algorithm = config.GetValueByKey("algorithm").(string)
+	jwtConfig.Audience = config.GetValueByKey("audience").(string)
+	jwtConfig.Issuer = config.GetValueByKey("issuer").(string)
+	jwtConfig.SecretKey = config.GetValueByKey("secretKey").(string)
+	jwtConfig.ExpiresIn = config.GetValueByKey("expiresIn").(string)
 
 	return jwtConfig
 }
