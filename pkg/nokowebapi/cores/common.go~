@@ -343,20 +343,12 @@ func IsNoneOrEmptyWhiteSpace(value string) bool {
 		temp == "\r\n"
 }
 
-func NewEncodeBase64(data []byte) string {
-	return base64.StdEncoding.EncodeToString(data)
+func NewEncodeBase64(key []byte) string {
+	return base64.StdEncoding.EncodeToString(key)
 }
 
-func NewEncodeBase64URLSafe(data []byte) string {
-	return base64.RawURLEncoding.EncodeToString(data)
-}
-
-func NewDecodeBase64(data string) ([]byte, error) {
-	return base64.StdEncoding.DecodeString(data)
-}
-
-func NewDecodeBase64URLSafe(data string) ([]byte, error) {
-	return base64.RawURLEncoding.DecodeString(data)
+func NewDecodeBase64(key string) ([]byte, error) {
+	return base64.StdEncoding.DecodeString(key)
 }
 
 func NewUuid() string {

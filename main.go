@@ -42,7 +42,11 @@ func main() {
 
 	console.Log("Try fetch url.")
 
-	cores.TryFetchUrlWaitForAlive(cores.Unwrap(url.Parse("http://localhost:5000")))
+	cores.TryFetchUrlWaitForAlive(cores.Unwrap(url.Parse("http://localhost")))
+
+	buff := cores.Unwrap(cores.HashPassword("Admin@1234"))
+	fmt.Println("Compare Password =", cores.CompareHashPassword(buff, "Admin@1234"))
+	fmt.Println("Password =", buff)
 
 	console.Log("Done.")
 
@@ -76,7 +80,7 @@ func main() {
 	//}
 	//
 	//hash := sha256.Sum256([]byte("Admin@1234"))
-	//password := cores.NewBase64EncodeToString(hash[:])
+	//password := cores.NewEncodeBase64(hash[:])
 	//db.Create(&models.User{
 	//	UUID:     cores.NewUuid(),
 	//	Email:    cores.NewNullString("admin@localhost"),
