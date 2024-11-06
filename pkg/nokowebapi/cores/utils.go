@@ -126,3 +126,7 @@ func EnsureDirAndFile(filePath string) error {
 
 	return nil
 }
+
+func GetName(obj any) string {
+	return fmt.Sprintf("%T", obj)
+}

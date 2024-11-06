@@ -3,12 +3,12 @@ package apis
 import (
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
-	"nokowebapi/cores/extras"
+	"nokowebapi/extras"
 )
 
-// BaseControllerImpl interface for a defined router as extras.RouterImpl and database with gorm.DB
+// BaseControllerImpl interface for a defined router as extras.EchoRouterImpl and database with gorm.DB
 type BaseControllerImpl interface {
-	Router() extras.RouterImpl
+	Router() extras.EchoRouterImpl
 	DB() *gorm.DB
 	Use(middleware ...echo.MiddlewareFunc)
 	Connect(path string, handler echo.HandlerFunc, middlewares ...echo.MiddlewareFunc)
@@ -25,18 +25,18 @@ type BaseControllerImpl interface {
 }
 
 type BaseController struct {
-	router extras.RouterImpl
+	router extras.EchoRouterImpl
 	db     *gorm.DB
 }
 
-func NewBaseController(router extras.RouterImpl, db *gorm.DB) BaseControllerImpl {
+func NewBaseController(router extras.EchoRouterImpl, db *gorm.DB) BaseControllerImpl {
 	return &BaseController{
 		router: router,
 		db:     db,
 	}
 }
 
-func (c *BaseController) Router() extras.RouterImpl {
+func (c *BaseController) Router() extras.EchoRouterImpl {
 	return c.router
 }
 

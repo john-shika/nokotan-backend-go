@@ -1,17 +1,17 @@
 package console
 
 import (
+	"github.com/mattn/go-colorable"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"io"
 	"nokowebapi/cores"
 	"nokowebapi/globals"
-	"os"
 )
 
-var Stdin io.Reader = os.Stdin
-var Stdout io.Writer = os.Stdout
-var Stderr io.Writer = os.Stderr
+var Stdout = colorable.NewColorableStdout()
+var Stderr = colorable.NewColorableStderr()
+
 var WriterSyncer zapcore.WriteSyncer
 
 var Logger *zap.Logger
@@ -27,6 +27,7 @@ func GetLocker() cores.LockerImpl {
 
 func updateWriterSyncer(stdout io.Writer) zapcore.WriteSyncer {
 	var ok bool
+	cores.KeepVoid(ok)
 
 	if stdout, ok = stdout.(zapcore.WriteSyncer); ok {
 		WriterSyncer = zapcore.Lock(stdout.(zapcore.WriteSyncer))
@@ -47,27 +48,36 @@ func NewWriterSyncer(stdout io.Writer) zapcore.WriteSyncer {
 
 func makeLogger() *zap.Logger {
 	var logger *zap.Logger
+	cores.KeepVoid(logger)
 
 	loggerConfig := globals.GetLoggerConfigGlobals()
-
-	level := globals.GetLoggerConfigLevel(loggerConfig)
-	option := zap.IncreaseLevel(level)
-
 	writerSyncer := NewWriterSyncer(Stdout)
+	level := globals.GetLoggerConfigLevel(loggerConfig)
+
+	options := []zap.Option{
+		zap.AddCaller(),
+		zap.AddCallerSkip(4),
+	}
+
+	if loggerConfig.StackTraceEnabled {
+		options = append(options, zap.AddStacktrace(zapcore.ErrorLevel))
+	}
+
+	options = append(options, zap.IncreaseLevel(level))
 
 	if loggerConfig.Development {
 		encoderConfig := zap.NewProductionEncoderConfig()
 		encoder := globals.GetLoggerConfigEncoder(loggerConfig, encoderConfig)
 		core := zapcore.NewCore(encoder, writerSyncer, level)
-		logger = zap.New(core, zap.AddCaller(), option)
+		logger = zap.New(core, options...)
 	} else {
 		encoderConfig := zap.NewDevelopmentEncoderConfig()
 		encoder := globals.GetLoggerConfigEncoder(loggerConfig, encoderConfig)
 		core := zapcore.NewCore(encoder, writerSyncer, level)
-		logger = zap.New(core, zap.AddCaller(), option)
+		logger = zap.New(core, options...)
 	}
 
-	logger = logger.Named("console")
+	logger = logger.Named("[NokoWebApi]")
 	zap.ReplaceGlobals(logger)
 	return logger
 }

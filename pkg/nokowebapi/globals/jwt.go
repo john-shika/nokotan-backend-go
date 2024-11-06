@@ -23,7 +23,7 @@ func JwtConfigGlobals() *cores.JwtConfig {
 	config.SetValueByKey("audience", jwtConfig.Audience)
 	config.SetValueByKey("issuer", jwtConfig.Issuer)
 	config.SetValueByKey("secretKey", jwtConfig.SecretKey)
-	config.SetValueByKey("expiresIn", jwtConfig.ExpiresIn)
+	config.SetValueByKey("expires", jwtConfig.Expires)
 
 	switch strings.ToUpper(jwtConfig.Algorithm) {
 	case "ES256":
@@ -65,7 +65,7 @@ func GetJwtConfigGlobals() *cores.JwtConfig {
 	jwtConfig.Audience = config.GetValueByKey("audience").(string)
 	jwtConfig.Issuer = config.GetValueByKey("issuer").(string)
 	jwtConfig.SecretKey = config.GetValueByKey("secretKey").(string)
-	jwtConfig.ExpiresIn = config.GetValueByKey("expiresIn").(string)
+	jwtConfig.Expires = config.GetValueByKey("expires").(string)
 
 	return jwtConfig
 }

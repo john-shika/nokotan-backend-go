@@ -1,7 +1,7 @@
 package cores
 
 type HttpStatusCode int
-type HttpStatusCodeValues string
+type HttpStatusCodeValue string
 
 const (
 	HttpStatusCodeContinue                      HttpStatusCode = 100
@@ -71,73 +71,73 @@ const (
 )
 
 const (
-	HttpStatusCodeValuesContinue                      HttpStatusCodeValues = "CONTINUE"
-	HttpStatusCodeValuesSwitchingProtocols                                 = "SWITCHING_PROTOCOLS"
-	HttpStatusCodeValuesProcessing                                         = "PROCESSING"
-	HttpStatusCodeValuesEarlyHints                                         = "EARLY_HINTS"
-	HttpStatusCodeValuesOk                                                 = "OK"
-	HttpStatusCodeValuesCreated                                            = "CREATED"
-	HttpStatusCodeValuesAccepted                                           = "ACCEPTED"
-	HttpStatusCodeValuesNonAuthoritativeInformation                        = "NON_AUTHORITATIVE_INFORMATION"
-	HttpStatusCodeValuesNoContent                                          = "NO_CONTENT"
-	HttpStatusCodeValuesResetContent                                       = "RESET_CONTENT"
-	HttpStatusCodeValuesPartialContent                                     = "PARTIAL_CONTENT"
-	HttpStatusCodeValuesMultiStatus                                        = "MULTI_STATUS"
-	HttpStatusCodeValuesAlreadyReported                                    = "ALREADY_REPORTED"
-	HttpStatusCodeValuesImUsed                                             = "IM_USED"
-	HttpStatusCodeValuesMultipleChoices                                    = "MULTI_CHOICES"
-	HttpStatusCodeValuesMovedPermanently                                   = "MOVED_PERMANENTLY"
-	HttpStatusCodeValuesFound                                              = "FOUND"
-	HttpStatusCodeValuesSeeOther                                           = "SEE_OTHER"
-	HttpStatusCodeValuesNotModified                                        = "NOT_MODIFIED"
-	HttpStatusCodeValuesUseProxy                                           = "USE_PROXY"
-	HttpStatusCodeValuesUnused                                             = "UNUSED"
-	HttpStatusCodeValuesTemporaryRedirect                                  = "TEMPORARY_REDIRECT"
-	HttpStatusCodeValuesPermanentRedirect                                  = "PERMANENT_REDIRECT"
-	HttpStatusCodeValuesBadRequest                                         = "BAD_REQUEST"
-	HttpStatusCodeValuesUnauthorized                                       = "UNAUTHORIZED"
-	HttpStatusCodeValuesPaymentRequired                                    = "PAYMENT_REQUIRED"
-	HttpStatusCodeValuesForbidden                                          = "FORBIDDEN"
-	HttpStatusCodeValuesNotFound                                           = "NOT_FOUND"
-	HttpStatusCodeValuesMethodNotAllowed                                   = "METHOD_NOT_ALLOWED"
-	HttpStatusCodeValuesNotAcceptable                                      = "NOT_ACCEPTABLE"
-	HttpStatusCodeValuesProxyAuthenticationRequired                        = "PROXY_AUTHENTICATION_REQUIRED"
-	HttpStatusCodeValuesRequestTimeout                                     = "REQUEST_TIMEOUT"
-	HttpStatusCodeValuesConflict                                           = "CONFLICT"
-	HttpStatusCodeValuesGone                                               = "GONE"
-	HttpStatusCodeValuesLengthRequired                                     = "LENGTH_REQUIRED"
-	HttpStatusCodeValuesPreconditionFailed                                 = "PRECONDITION_FAILED"
-	HttpStatusCodeValuesPayloadTooLarge                                    = "PAYLOAD_TOO_LARGE"
-	HttpStatusCodeValuesRequestUriTooLong                                  = "REQUEST_URI_TOO_LONG"
-	HttpStatusCodeValuesUnsupportedMediaType                               = "UNSUPPORTED_MEDIA_TYPE"
-	HttpStatusCodeValuesRequestedRangeNotSatisfiable                       = "REQUESTED_RANGE_NOT_SATISFIABLE"
-	HttpStatusCodeValuesExpectationFailed                                  = "EXPECTATION_FAILED"
-	HttpStatusCodeValuesImATeapot                                          = "IM_A_TEAPOT"
-	HttpStatusCodeValuesInsufficientSpaceOnResource                        = "INSUFFICIENT_SPACE_ON_RESOURCE"
-	HttpStatusCodeValuesMethodFailure                                      = "METHOD_FAILURE"
-	HttpStatusCodeValuesMisdirectedRequest                                 = "MISDIRECTED_REQUEST"
-	HttpStatusCodeValuesUnprocessableEntity                                = "UNPROCESSABLE_ENTITY"
-	HttpStatusCodeValuesLocked                                             = "LOCKED"
-	HttpStatusCodeValuesFailedDependency                                   = "FAILED_DEPENDENCY"
-	HttpStatusCodeValuesUpgradeRequired                                    = "UPGRADE_REQUIRED"
-	HttpStatusCodeValuesPreconditionRequired                               = "PRECONDITION_REQUIRED"
-	HttpStatusCodeValuesTooManyRequests                                    = "TOO_MANY_REQUESTS"
-	HttpStatusCodeValuesRequestHeaderFieldsTooLarge                        = "REQUEST_HEADER_FIELDS_TOO_LARGE"
-	HttpStatusCodeValuesUnavailableForLegalReasons                         = "UNAVAILABLE_FOR_LEGAL_REASONS"
-	HttpStatusCodeValuesInternalServerError                                = "INTERNAL_SERVER_ERROR"
-	HttpStatusCodeValuesNotImplemented                                     = "NOT_IMPLEMENTED"
-	HttpStatusCodeValuesBadGateway                                         = "BAD_GATEWAY"
-	HttpStatusCodeValuesServiceUnavailable                                 = "SERVICE_UNAVAILABLE"
-	HttpStatusCodeValuesGatewayTimeout                                     = "GATEWAY_TIMEOUT"
-	HttpStatusCodeValuesHttpVersionNotSupported                            = "HTTP_VERSION_NOT_SUPPORTED"
-	HttpStatusCodeValuesVariantAlsoNegotiates                              = "VARIANT_ALSO_NEGOTIATES"
-	HttpStatusCodeValuesInsufficientStorage                                = "INSUFFICIENT_STORAGE"
-	HttpStatusCodeValuesLoopDetected                                       = "LOOP_DETECTED"
-	HttpStatusCodeValuesNotExtended                                        = "NOT_EXTENDED"
-	HttpStatusCodeValuesNetworkAuthenticationRequired                      = "NETWORK_AUTHENTICATION_REQUIRED"
+	HttpStatusCodeValuesContinue                      HttpStatusCodeValue = "CONTINUE"
+	HttpStatusCodeValuesSwitchingProtocols                                = "SWITCHING_PROTOCOLS"
+	HttpStatusCodeValuesProcessing                                        = "PROCESSING"
+	HttpStatusCodeValuesEarlyHints                                        = "EARLY_HINTS"
+	HttpStatusCodeValuesOk                                                = "OK"
+	HttpStatusCodeValuesCreated                                           = "CREATED"
+	HttpStatusCodeValuesAccepted                                          = "ACCEPTED"
+	HttpStatusCodeValuesNonAuthoritativeInformation                       = "NON_AUTHORITATIVE_INFORMATION"
+	HttpStatusCodeValuesNoContent                                         = "NO_CONTENT"
+	HttpStatusCodeValuesResetContent                                      = "RESET_CONTENT"
+	HttpStatusCodeValuesPartialContent                                    = "PARTIAL_CONTENT"
+	HttpStatusCodeValuesMultiStatus                                       = "MULTI_STATUS"
+	HttpStatusCodeValuesAlreadyReported                                   = "ALREADY_REPORTED"
+	HttpStatusCodeValuesImUsed                                            = "IM_USED"
+	HttpStatusCodeValuesMultipleChoices                                   = "MULTI_CHOICES"
+	HttpStatusCodeValuesMovedPermanently                                  = "MOVED_PERMANENTLY"
+	HttpStatusCodeValuesFound                                             = "FOUND"
+	HttpStatusCodeValuesSeeOther                                          = "SEE_OTHER"
+	HttpStatusCodeValuesNotModified                                       = "NOT_MODIFIED"
+	HttpStatusCodeValuesUseProxy                                          = "USE_PROXY"
+	HttpStatusCodeValuesUnused                                            = "UNUSED"
+	HttpStatusCodeValuesTemporaryRedirect                                 = "TEMPORARY_REDIRECT"
+	HttpStatusCodeValuesPermanentRedirect                                 = "PERMANENT_REDIRECT"
+	HttpStatusCodeValuesBadRequest                                        = "BAD_REQUEST"
+	HttpStatusCodeValuesUnauthorized                                      = "UNAUTHORIZED"
+	HttpStatusCodeValuesPaymentRequired                                   = "PAYMENT_REQUIRED"
+	HttpStatusCodeValuesForbidden                                         = "FORBIDDEN"
+	HttpStatusCodeValuesNotFound                                          = "NOT_FOUND"
+	HttpStatusCodeValuesMethodNotAllowed                                  = "METHOD_NOT_ALLOWED"
+	HttpStatusCodeValuesNotAcceptable                                     = "NOT_ACCEPTABLE"
+	HttpStatusCodeValuesProxyAuthenticationRequired                       = "PROXY_AUTHENTICATION_REQUIRED"
+	HttpStatusCodeValuesRequestTimeout                                    = "REQUEST_TIMEOUT"
+	HttpStatusCodeValuesConflict                                          = "CONFLICT"
+	HttpStatusCodeValuesGone                                              = "GONE"
+	HttpStatusCodeValuesLengthRequired                                    = "LENGTH_REQUIRED"
+	HttpStatusCodeValuesPreconditionFailed                                = "PRECONDITION_FAILED"
+	HttpStatusCodeValuesPayloadTooLarge                                   = "PAYLOAD_TOO_LARGE"
+	HttpStatusCodeValuesRequestUriTooLong                                 = "REQUEST_URI_TOO_LONG"
+	HttpStatusCodeValuesUnsupportedMediaType                              = "UNSUPPORTED_MEDIA_TYPE"
+	HttpStatusCodeValuesRequestedRangeNotSatisfiable                      = "REQUESTED_RANGE_NOT_SATISFIABLE"
+	HttpStatusCodeValuesExpectationFailed                                 = "EXPECTATION_FAILED"
+	HttpStatusCodeValuesImATeapot                                         = "IM_A_TEAPOT"
+	HttpStatusCodeValuesInsufficientSpaceOnResource                       = "INSUFFICIENT_SPACE_ON_RESOURCE"
+	HttpStatusCodeValuesMethodFailure                                     = "METHOD_FAILURE"
+	HttpStatusCodeValuesMisdirectedRequest                                = "MISDIRECTED_REQUEST"
+	HttpStatusCodeValuesUnprocessableEntity                               = "UNPROCESSABLE_ENTITY"
+	HttpStatusCodeValuesLocked                                            = "LOCKED"
+	HttpStatusCodeValuesFailedDependency                                  = "FAILED_DEPENDENCY"
+	HttpStatusCodeValuesUpgradeRequired                                   = "UPGRADE_REQUIRED"
+	HttpStatusCodeValuesPreconditionRequired                              = "PRECONDITION_REQUIRED"
+	HttpStatusCodeValuesTooManyRequests                                   = "TOO_MANY_REQUESTS"
+	HttpStatusCodeValuesRequestHeaderFieldsTooLarge                       = "REQUEST_HEADER_FIELDS_TOO_LARGE"
+	HttpStatusCodeValuesUnavailableForLegalReasons                        = "UNAVAILABLE_FOR_LEGAL_REASONS"
+	HttpStatusCodeValuesInternalServerError                               = "INTERNAL_SERVER_ERROR"
+	HttpStatusCodeValuesNotImplemented                                    = "NOT_IMPLEMENTED"
+	HttpStatusCodeValuesBadGateway                                        = "BAD_GATEWAY"
+	HttpStatusCodeValuesServiceUnavailable                                = "SERVICE_UNAVAILABLE"
+	HttpStatusCodeValuesGatewayTimeout                                    = "GATEWAY_TIMEOUT"
+	HttpStatusCodeValuesHttpVersionNotSupported                           = "HTTP_VERSION_NOT_SUPPORTED"
+	HttpStatusCodeValuesVariantAlsoNegotiates                             = "VARIANT_ALSO_NEGOTIATES"
+	HttpStatusCodeValuesInsufficientStorage                               = "INSUFFICIENT_STORAGE"
+	HttpStatusCodeValuesLoopDetected                                      = "LOOP_DETECTED"
+	HttpStatusCodeValuesNotExtended                                       = "NOT_EXTENDED"
+	HttpStatusCodeValuesNetworkAuthenticationRequired                     = "NETWORK_AUTHENTICATION_REQUIRED"
 )
 
-func (httpStatusCodeValues HttpStatusCodeValues) FromCode(code HttpStatusCode) HttpStatusCodeValues {
+func (httpStatusCodeValues HttpStatusCodeValue) FromCode(code HttpStatusCode) HttpStatusCodeValue {
 	switch code {
 	case HttpStatusCodeContinue:
 		return HttpStatusCodeValuesContinue
@@ -272,8 +272,8 @@ func (httpStatusCodeValues HttpStatusCodeValues) FromCode(code HttpStatusCode) H
 	}
 }
 
-func (httpStatusCodeValues HttpStatusCodeValues) ParseCode(value string) HttpStatusCode {
-	switch HttpStatusCodeValues(ToSnakeCaseUpper(value)) {
+func (httpStatusCodeValues HttpStatusCodeValue) ParseCode(value string) HttpStatusCode {
+	switch HttpStatusCodeValue(ToSnakeCaseUpper(value)) {
 	case HttpStatusCodeValuesContinue:
 		return HttpStatusCodeContinue
 	case HttpStatusCodeValuesSwitchingProtocols:

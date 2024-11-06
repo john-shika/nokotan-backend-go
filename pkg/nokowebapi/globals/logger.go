@@ -8,9 +8,10 @@ import (
 )
 
 type LoggerConfig struct {
-	Development bool   `mapstructure:"development" json:"development"`
-	Encoding    string `mapstructure:"encoding" json:"encoding"`
-	Level       string `mapstructure:"level" json:"level"`
+	Development       bool   `mapstructure:"development" json:"development"`
+	Encoding          string `mapstructure:"encoding" json:"encoding"`
+	Level             string `mapstructure:"level" json:"level"`
+	StackTraceEnabled bool   `mapstructure:"stack_trace_enabled" json:"stackTraceEnabled"`
 }
 
 func NewLoggerConfig() *LoggerConfig {
@@ -31,6 +32,8 @@ func GetLoggerConfigLevel(loggerConfig *LoggerConfig) zapcore.Level {
 		return zapcore.WarnLevel
 	case "error":
 		return zapcore.ErrorLevel
+	case "fatal":
+		return zapcore.FatalLevel
 	default:
 		return zapcore.DebugLevel
 	}
@@ -82,6 +85,8 @@ func LoggerConfigGlobals() *LoggerConfig {
 
 	config.SetValueByKey("development", loggerConfig.Development)
 	config.SetValueByKey("level", loggerConfig.Level)
+	config.SetValueByKey("encoding", loggerConfig.Encoding)
+	config.SetValueByKey("stackTraceEnabled", loggerConfig.StackTraceEnabled)
 
 	return loggerConfig
 }
@@ -93,6 +98,8 @@ func GetLoggerConfigGlobals() *LoggerConfig {
 
 	loggerConfig.Development = cores.Unwrap(cores.CastBool(config.GetValueByKey("development")))
 	loggerConfig.Level = cores.Unwrap(cores.CastString(config.GetValueByKey("level")))
+	loggerConfig.Encoding = cores.Unwrap(cores.CastString(config.GetValueByKey("encoding")))
+	loggerConfig.StackTraceEnabled = cores.Unwrap(cores.CastBool(config.GetValueByKey("stackTraceEnabled")))
 
 	return loggerConfig
 }

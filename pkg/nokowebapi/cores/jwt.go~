@@ -29,33 +29,34 @@ type JwtConfig struct {
 	Algorithm string `mapstructure:"algorithm" json:"algorithm"`
 	SecretKey string `mapstructure:"secret_key" json:"secretKey"`
 	Audience  string `mapstructure:"audience" json:"audience"`
-	Issuer    string `mapstructure:"issuer" json:"issuer"`
-	ExpiresIn string `mapstructure:"expires_in" json:"expiresIn"`
+	Issuer  string `mapstructure:"issuer" json:"issuer"`
+	Expires string `mapstructure:"expires" json:"expires"`
 }
 
 func NewJwtConfig() *JwtConfig {
 	return new(JwtConfig)
 }
 
-func (*JwtConfig) GetName() string {
+func (JwtConfig) GetName() string {
 	return "jwtSettings"
 }
 
 // TODO: not implemented yet
 
-type JwtClaimNameTyped string
+type JwtClaimNamed string
 
 const (
-	JwtClaimNameIdentity  JwtClaimNameTyped = "jti"
-	JwtClaimNameSubject   JwtClaimNameTyped = "sub"
-	JwtClaimNameSessionId JwtClaimNameTyped = "sid"
-	JwtClaimNameIssuedAt  JwtClaimNameTyped = "iat"
-	JwtClaimNameIssuer    JwtClaimNameTyped = "iss"
-	JwtClaimNameAudience  JwtClaimNameTyped = "aud"
-	JwtClaimNameExpiresAt JwtClaimNameTyped = "exp"
-	JwtClaimNameUser      JwtClaimNameTyped = "name"
-	JwtClaimNameEmail     JwtClaimNameTyped = "email"
-	JwtClaimNameRole      JwtClaimNameTyped = "role"
+	JwtClaimIdentity  JwtClaimNamed = "jti"
+	JwtClaimSubject   JwtClaimNamed = "sub"
+	JwtClaimSessionId JwtClaimNamed = "sid"
+	JwtClaimIssuedAt  JwtClaimNamed = "iat"
+	JwtClaimIssuer    JwtClaimNamed = "iss"
+	JwtClaimAudience  JwtClaimNamed = "aud"
+	JwtClaimExpiresAt JwtClaimNamed = "exp"
+	JwtClaimUser      JwtClaimNamed = "user"
+	JwtClaimEmail     JwtClaimNamed = "email"
+	JwtClaimPhone     JwtClaimNamed = "phone"
+	JwtClaimRole      JwtClaimNamed = "role"
 )
 
 type JwtTokenImpl interface {
@@ -451,19 +452,19 @@ func (claims *JwtClaims) ParseStringMany(key string) ([]string, error) {
 }
 
 func (claims *JwtClaims) GetIdentity() (string, error) {
-	return claims.ParseString(string(JwtClaimNameIdentity))
+	return claims.ParseString(string(JwtClaimIdentity))
 }
 
 func (claims *JwtClaims) SetIdentity(identity string) bool {
-	return claims.Set(string(JwtClaimNameIdentity), identity)
+	return claims.Set(string(JwtClaimIdentity), identity)
 }
 
 func (claims *JwtClaims) GetSubject() (string, error) {
-	return claims.ParseString(string(JwtClaimNameSubject))
+	return claims.ParseString(string(JwtClaimSubject))
 }
 
 func (claims *JwtClaims) SetSubject(subject string) bool {
-	return claims.Set(string(JwtClaimNameSubject), subject)
+	return claims.Set(string(JwtClaimSubject), subject)
 }
 
 func (claims *JwtClaims) GetIssued() (*jwt.NumericDate, error) {
@@ -471,28 +472,28 @@ func (claims *JwtClaims) GetIssued() (*jwt.NumericDate, error) {
 	var temp *jwt.NumericDate
 	KeepVoid(err, temp)
 
-	temp, err = claims.ParseNumericDate(string(JwtClaimNameIssuedAt))
+	temp, err = claims.ParseNumericDate(string(JwtClaimIssuedAt))
 	return temp, err
 }
 
 func (claims *JwtClaims) SetIssuedAt(date any) bool {
-	return claims.Set(string(JwtClaimNameIssuedAt), GetJwtNumericDateFromAny(date))
+	return claims.Set(string(JwtClaimIssuedAt), GetJwtNumericDateFromAny(date))
 }
 
 func (claims *JwtClaims) GetIssuer() (string, error) {
-	return claims.ParseString(string(JwtClaimNameIssuer))
+	return claims.ParseString(string(JwtClaimIssuer))
 }
 
 func (claims *JwtClaims) SetIssuer(issuer string) bool {
-	return claims.Set(string(JwtClaimNameIssuer), issuer)
+	return claims.Set(string(JwtClaimIssuer), issuer)
 }
 
 func (claims *JwtClaims) GetAudience() ([]string, error) {
-	return claims.ParseStringMany(string(JwtClaimNameAudience))
+	return claims.ParseStringMany(string(JwtClaimAudience))
 }
 
 func (claims *JwtClaims) SetAudience(audience []string) bool {
-	return claims.Set(string(JwtClaimNameAudience), audience)
+	return claims.Set(string(JwtClaimAudience), audience)
 }
 
 func (claims *JwtClaims) GetExpires() (*jwt.NumericDate, error) {
@@ -500,44 +501,52 @@ func (claims *JwtClaims) GetExpires() (*jwt.NumericDate, error) {
 	var temp *jwt.NumericDate
 	KeepVoid(err, temp)
 
-	temp, err = claims.ParseNumericDate(string(JwtClaimNameExpiresAt))
+	temp, err = claims.ParseNumericDate(string(JwtClaimExpiresAt))
 	return temp, err
 }
 
 func (claims *JwtClaims) SetExpiresAt(date any) bool {
-	return claims.Set(string(JwtClaimNameExpiresAt), GetJwtNumericDateFromAny(date))
+	return claims.Set(string(JwtClaimExpiresAt), GetJwtNumericDateFromAny(date))
 }
 
 func (claims *JwtClaims) GetSessionId() (string, error) {
-	return claims.ParseString(string(JwtClaimNameSessionId))
+	return claims.ParseString(string(JwtClaimSessionId))
 }
 
 func (claims *JwtClaims) SetSessionId(sessionId string) bool {
-	return claims.Set(string(JwtClaimNameSessionId), sessionId)
+	return claims.Set(string(JwtClaimSessionId), sessionId)
 }
 
 func (claims *JwtClaims) GetUser() (string, error) {
-	return claims.ParseString(string(JwtClaimNameUser))
+	return claims.ParseString(string(JwtClaimUser))
 }
 
 func (claims *JwtClaims) SetUser(user string) bool {
-	return claims.Set(string(JwtClaimNameUser), user)
+	return claims.Set(string(JwtClaimUser), user)
 }
 
 func (claims *JwtClaims) GetRole() (string, error) {
-	return claims.ParseString(string(JwtClaimNameRole))
+	return claims.ParseString(string(JwtClaimRole))
 }
 
 func (claims *JwtClaims) SetRole(role string) bool {
-	return claims.Set(string(JwtClaimNameRole), role)
+	return claims.Set(string(JwtClaimRole), role)
 }
 
 func (claims *JwtClaims) GetEmail() (string, error) {
-	return claims.ParseString(string(JwtClaimNameEmail))
+	return claims.ParseString(string(JwtClaimEmail))
 }
 
 func (claims *JwtClaims) SetEmail(email string) bool {
-	return claims.Set(string(JwtClaimNameEmail), email)
+	return claims.Set(string(JwtClaimEmail), email)
+}
+
+func (claims *JwtClaims) GetPhone() (string, error) {
+	return claims.ParseString(string(JwtClaimPhone))
+}
+
+func (claims *JwtClaims) SetPhone(phone string) bool {
+	return claims.Set(string(JwtClaimPhone), phone)
 }
 
 func ParseJwtTokenUnverified(token string) (JwtTokenImpl, error) {

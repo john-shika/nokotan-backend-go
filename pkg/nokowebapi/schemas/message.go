@@ -21,31 +21,31 @@ func NewMessageBody(statusOk bool, statusCode int, status string, message string
 }
 
 func NewMessageBodyOk(message string, data any) *MessageBody {
-	status := cores.Default[cores.HttpStatusCodeValues]().FromCode(cores.HttpStatusCodeOk)
+	status := cores.Default[cores.HttpStatusCodeValue]().FromCode(cores.HttpStatusCodeOk)
 	return NewMessageBody(false, cores.HttpStatusCodeOk, string(status), message, data)
 }
 
 func NewMessageBodyCreated(message string, data any) *MessageBody {
-	status := cores.Default[cores.HttpStatusCodeValues]().FromCode(cores.HttpStatusCodeCreated)
+	status := cores.Default[cores.HttpStatusCodeValue]().FromCode(cores.HttpStatusCodeCreated)
 	return NewMessageBody(false, cores.HttpStatusCodeCreated, string(status), message, data)
 }
 
 func NewMessageBodyUnauthorized(message string, data any) *MessageBody {
-	status := cores.Default[cores.HttpStatusCodeValues]().FromCode(cores.HttpStatusCodeUnauthorized)
+	status := cores.Default[cores.HttpStatusCodeValue]().FromCode(cores.HttpStatusCodeUnauthorized)
 	return NewMessageBody(false, cores.HttpStatusCodeUnauthorized, string(status), message, data)
 }
 
 func NewMessageBodyBadRequest(message string, data any) *MessageBody {
-	status := cores.Default[cores.HttpStatusCodeValues]().FromCode(cores.HttpStatusCodeBadRequest)
+	status := cores.Default[cores.HttpStatusCodeValue]().FromCode(cores.HttpStatusCodeBadRequest)
 	return NewMessageBody(false, cores.HttpStatusCodeBadRequest, string(status), message, data)
 }
 
 func NewMessageBodyNotFound(message string, data any) *MessageBody {
-	status := cores.Default[cores.HttpStatusCodeValues]().FromCode(cores.HttpStatusCodeNotFound)
+	status := cores.Default[cores.HttpStatusCodeValue]().FromCode(cores.HttpStatusCodeNotFound)
 	return NewMessageBody(false, cores.HttpStatusCodeNotFound, string(status), message, data)
 }
 
 func NewMessageBodyInternalServerError(message string, data any) *MessageBody {
-	status := cores.Default[cores.HttpStatusCodeValues]().FromCode(cores.HttpStatusCodeInternalServerError)
+	status := cores.Default[cores.HttpStatusCodeValue]().FromCode(cores.HttpStatusCodeInternalServerError)
 	return NewMessageBody(false, cores.HttpStatusCodeInternalServerError, string(status), message, data)
 }

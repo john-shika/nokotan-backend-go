@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-type RouterImpl interface {
+type EchoRouterImpl interface {
 	Use(middleware ...echo.MiddlewareFunc)
 	CONNECT(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc) *echo.Route
 	DELETE(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc) *echo.Route
@@ -24,7 +24,7 @@ type RouterImpl interface {
 	Add(method, path string, handler echo.HandlerFunc, middleware ...echo.MiddlewareFunc) *echo.Route
 }
 
-func GetJwtToken(c echo.Context) (string, error) {
+func GetJwtTokenFromEchoContext(c echo.Context) (string, error) {
 	var ok bool
 	var token string
 	cores.KeepVoid(ok, token)
@@ -36,10 +36,8 @@ func GetJwtToken(c echo.Context) (string, error) {
 	if token, ok = strings.CutPrefix(token, "Bearer "); !ok {
 		return "", cores.ErrJwtTokenNotFound
 	}
-
 	if token = strings.Trim(token, " "); token == "" {
 		return "", cores.ErrJwtTokenNotFound
 	}
-
 	return token, nil
 }

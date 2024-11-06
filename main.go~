@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
+	"math/big"
+	"net/url"
 	"nokotan/app"
 	"nokowebapi/console"
 	"nokowebapi/cores"
@@ -31,10 +33,25 @@ func main() {
 	console.Dir(globals.ConfigDefaults)
 
 	console.Warn("This is warning message.", zap.Int("EXIT_CODE", cores.EXIT_FAILURE))
+	//console.Fatal("This is error message.", zap.Int("EXIT_CODE", cores.EXIT_FAILURE))
 
-	console.Fatal("This is error message.", zap.Int("EXIT_CODE", cores.EXIT_FAILURE))
+	f1, _, _ := big.ParseFloat("540.235273912", 10, 0, big.ToNearestEven)
+	f2, _, _ := big.ParseFloat("728.825273912", 10, 0, big.ToNearestEven)
+	f1.Add(f1, f2)
+	fmt.Println(f1.String())
 
-	fmt.Println(12)
+	console.Log("Try fetch url.")
+
+	cores.TryFetchUrlWaitForAlive(cores.Unwrap(url.Parse("http://localhost")))
+
+	console.Log("Done.")
+
+	cores.Unwrap(cores.SetWorkingDir(func(workingDir cores.WorkingDirImpl) {
+		console.Log(workingDir.GetSourceRootDir())
+		console.Log(cores.Unwrap(cores.GetSourceRootDir()))
+		console.Log(workingDir.GetCurrentWorkingDir())
+		console.Log(cores.Unwrap(cores.GetCurrentWorkingDir()))
+	}))
 
 	//var db *gorm.DB
 	//cores.KeepVoid(db)
