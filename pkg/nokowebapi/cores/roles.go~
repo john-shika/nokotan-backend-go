@@ -1,9 +1,0 @@
-package cores
-
-type RoleTyped string
-
-const (
-	RoleAdmin RoleTyped = "Admin"
-	RoleUser  RoleTyped = "User"
-	RoleGuest RoleTyped = "Guest"
-)
