@@ -30,7 +30,7 @@ type JwtConfig struct {
 	SecretKey string `mapstructure:"secret_key" json:"secretKey"`
 	Audience  string `mapstructure:"audience" json:"audience"`
 	Issuer    string `mapstructure:"issuer" json:"issuer"`
-	ExpiresIn string `mapstructure:"expires_in" json:"expiresIn"`
+	Expires   string `mapstructure:"expires" json:"expires"`
 }
 
 func NewJwtConfig() *JwtConfig {

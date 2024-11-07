@@ -25,7 +25,7 @@ func AuthJWT(db *gorm.DB) echo.MiddlewareFunc {
 			var jwtToken cores.JwtTokenImpl
 			var session *models.Session
 			cores.KeepVoid(err, token, jwtToken, session)
-			
+
 			if token, err = extras.GetJwtTokenFromEchoContext(c); err != nil {
 				return c.JSON(http.StatusUnauthorized, schemas.NewMessageBodyUnauthorized(err.Error(), nil))
 			}

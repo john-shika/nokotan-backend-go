@@ -16,14 +16,18 @@ func JwtConfigGlobals() *cores.JwtConfig {
 		panic(fmt.Errorf("fatal error config file: %w", err))
 	}
 
+	if jwtConfig == nil {
+		return GetJwtConfigGlobals()
+	}
+
 	keyName := cores.ToCamelCase(cores.GetName(jwtConfig))
-	config := ConfigDefaults.GetValueByKey(keyName).(cores.MapAny)
+	config := Defaults.GetValueByKey(keyName).(cores.MapAny)
 
 	config.SetValueByKey("algorithm", jwtConfig.Algorithm)
 	config.SetValueByKey("audience", jwtConfig.Audience)
 	config.SetValueByKey("issuer", jwtConfig.Issuer)
 	config.SetValueByKey("secretKey", jwtConfig.SecretKey)
-	config.SetValueByKey("expires", jwtConfig.Expires)
+	config.SetValueByKey("expiresIn", jwtConfig.ExpiresIn)
 
 	switch strings.ToUpper(jwtConfig.Algorithm) {
 	case "ES256":
@@ -59,13 +63,13 @@ func GetJwtConfigGlobals() *cores.JwtConfig {
 	jwtConfig := cores.NewJwtConfig()
 
 	keyName := cores.ToCamelCase(cores.GetName(jwtConfig))
-	config := ConfigDefaults.GetValueByKey(keyName).(cores.MapAny)
+	config := Defaults.GetValueByKey(keyName).(cores.MapAny)
 
 	jwtConfig.Algorithm = config.GetValueByKey("algorithm").(string)
 	jwtConfig.Audience = config.GetValueByKey("audience").(string)
 	jwtConfig.Issuer = config.GetValueByKey("issuer").(string)
 	jwtConfig.SecretKey = config.GetValueByKey("secretKey").(string)
-	jwtConfig.Expires = config.GetValueByKey("expires").(string)
+	jwtConfig.ExpiresIn = config.GetValueByKey("expiresIn").(string)
 
 	return jwtConfig
 }

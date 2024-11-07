@@ -90,11 +90,11 @@ func NewLogger() *zap.Logger {
 	return Logger
 }
 
-func Dir(obj any, fields ...zap.Field) {
+func Dir(m cores.MapAnyImpl, fields ...zap.Field) {
 	locker := GetLocker()
 	locker.Lock(func() {
 		logger := NewLogger()
-		data := "\n" + cores.ShikaYamlEncodePreview(obj)
+		data := "\n" + cores.ShikaYamlEncodePreview(m)
 		logger.Info(data, fields...)
 	})
 }

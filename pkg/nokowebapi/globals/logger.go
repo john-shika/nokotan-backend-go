@@ -19,7 +19,7 @@ func NewLoggerConfig() *LoggerConfig {
 }
 
 func (LoggerConfig) GetName() string {
-	return "logger"
+	return "Logger"
 }
 
 func GetLoggerConfigLevel(loggerConfig *LoggerConfig) zapcore.Level {
@@ -80,8 +80,12 @@ func LoggerConfigGlobals() *LoggerConfig {
 		panic(fmt.Errorf("fatal error config file: %w", err))
 	}
 
+	if loggerConfig == nil {
+		return GetLoggerConfigGlobals()
+	}
+
 	keyName := cores.ToCamelCase(cores.GetName(loggerConfig))
-	config := ConfigDefaults.GetValueByKey(keyName).(cores.MapAny)
+	config := Defaults.GetValueByKey(keyName).(cores.MapAny)
 
 	config.SetValueByKey("development", loggerConfig.Development)
 	config.SetValueByKey("level", loggerConfig.Level)
@@ -94,7 +98,7 @@ func LoggerConfigGlobals() *LoggerConfig {
 func GetLoggerConfigGlobals() *LoggerConfig {
 	loggerConfig := NewLoggerConfig()
 	keyName := cores.ToCamelCase(cores.GetName(loggerConfig))
-	config := ConfigDefaults.GetValueByKey(keyName).(cores.MapAny)
+	config := Defaults.GetValueByKey(keyName).(cores.MapAny)
 
 	loggerConfig.Development = config.GetValueByKey("development").(bool)
 	loggerConfig.Level = config.GetValueByKey("level").(string)

@@ -25,7 +25,7 @@ func main() {
 		panic(fmt.Errorf("fatal error config file: %w", err))
 	}
 
-	console.Dir(globals.Globals().GetJwtConfig())
+	console.Log(cores.ShikaYamlEncodePreview(globals.Globals().GetJwtConfig()))
 
 	console.Log(fmt.Sprintf("JWT config expires in = %f / hour \n", cores.Unwrap(time.ParseDuration(globals.Globals().GetJwtConfig().ExpiresIn)).Hours()))
 
