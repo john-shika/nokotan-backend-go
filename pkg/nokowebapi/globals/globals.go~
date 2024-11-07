@@ -54,7 +54,7 @@ func (c *Configuration) GetJwtConfig() *cores.JwtConfig {
 
 func (c *Configuration) GetLoggerConfig() *LoggerConfig {
 	c.locker.Lock(func() {
-		// pass as you go
+			// pass as you go
 		if c.loggerConfig == nil {
 			c.loggerConfig = LoggerConfigGlobals()
 		}
