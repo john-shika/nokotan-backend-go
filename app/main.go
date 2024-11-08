@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"nokowebapi/console"
 	"nokowebapi/cores"
+	"nokowebapi/task"
 	"os"
 	"path"
 	"strings"
@@ -49,7 +50,7 @@ func Main(args []string) int {
 		}
 
 		program := args[0]
-		process := cores.Unwrap(cores.MakeProcess(program, args, envs, nil, os.Stdout, os.Stderr))
+		process := cores.Unwrap(task.MakeProcess(program, args, envs, nil, os.Stdout, os.Stderr))
 		cores.NoErr(process.Run())
 	}
 
@@ -64,7 +65,7 @@ func Main(args []string) int {
 		}
 
 		program := path.Join(cores.Unwrap(os.Getwd()), deskClientPath)
-		process := cores.Unwrap(cores.MakeProcess(program, args, envs, nil, os.Stdout, os.Stderr))
+		process := cores.Unwrap(task.MakeProcess(program, args, envs, nil, os.Stdout, os.Stderr))
 		cores.NoErr(process.Run())
 	}
 

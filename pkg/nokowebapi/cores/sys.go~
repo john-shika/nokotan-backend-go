@@ -2,14 +2,16 @@ package cores
 
 import "os"
 
+type ExitCode int
+
 const (
-	EXIT_SUCCESS int = 0
-	EXIT_FAILURE int = 1
+	ExitCodeSuccess ExitCode = iota
+	ExitCodeFailure
 )
 
-type MainFunc func([]string) int
+type MainFunc func([]string) ExitCode
 
-func (m MainFunc) Call(args []string) int {
+func (m MainFunc) Call(args []string) ExitCode {
 	return m(args)
 }
 

@@ -1,16 +1,14 @@
 package console
 
 import (
-	"github.com/mattn/go-colorable"
+	"fmt"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"io"
 	"nokowebapi/cores"
 	"nokowebapi/globals"
+	"nokowebapi/xterm"
 )
-
-var Stdout = colorable.NewColorableStdout()
-var Stderr = colorable.NewColorableStderr()
 
 var WriterSyncer zapcore.WriteSyncer
 
@@ -51,8 +49,8 @@ func makeLogger() *zap.Logger {
 	cores.KeepVoid(logger)
 
 	loggerConfig := globals.Globals().GetLoggerConfig()
-	writerSyncer := NewWriterSyncer(Stdout)
-	level := globals.GetLoggerConfigLevel(loggerConfig)
+	writerSyncer := NewWriterSyncer(xterm.Stdout)
+	level := loggerConfig.GetLevel()
 
 	options := []zap.Option{
 		zap.AddCaller(),
@@ -67,12 +65,12 @@ func makeLogger() *zap.Logger {
 
 	if loggerConfig.Development {
 		encoderConfig := zap.NewProductionEncoderConfig()
-		encoder := globals.GetLoggerConfigEncoder(loggerConfig, encoderConfig)
+		encoder := cores.GetLoggerConfigEncoder(loggerConfig, encoderConfig)
 		core := zapcore.NewCore(encoder, writerSyncer, level)
 		logger = zap.New(core, options...)
 	} else {
 		encoderConfig := zap.NewDevelopmentEncoderConfig()
-		encoder := globals.GetLoggerConfigEncoder(loggerConfig, encoderConfig)
+		encoder := cores.GetLoggerConfigEncoder(loggerConfig, encoderConfig)
 		core := zapcore.NewCore(encoder, writerSyncer, level)
 		logger = zap.New(core, options...)
 	}
@@ -107,6 +105,14 @@ func Log(msg string, fields ...zap.Field) {
 	})
 }
 
+func Logf(format string, args ...any) {
+	locker := GetLocker()
+	locker.Lock(func() {
+		logger := NewLogger()
+		logger.Info(fmt.Sprintf(format, args...))
+	})
+}
+
 func Warn(msg string, fields ...zap.Field) {
 	locker := GetLocker()
 	locker.Lock(func() {
@@ -118,8 +124,8 @@ func Warn(msg string, fields ...zap.Field) {
 func Error(msg string, fields ...zap.Field) {
 	locker := GetLocker()
 	locker.Lock(func() {
-		defer updateWriterSyncer(Stdout)
-		updateWriterSyncer(Stderr)
+		defer updateWriterSyncer(xterm.Stdout)
+		updateWriterSyncer(xterm.Stderr)
 
 		logger := NewLogger()
 		logger.Error(msg, fields...)
@@ -129,8 +135,8 @@ func Error(msg string, fields ...zap.Field) {
 func Fatal(msg string, fields ...zap.Field) {
 	locker := GetLocker()
 	locker.Lock(func() {
-		defer updateWriterSyncer(Stdout)
-		updateWriterSyncer(Stderr)
+		defer updateWriterSyncer(xterm.Stdout)
+		updateWriterSyncer(xterm.Stderr)
 
 		logger := NewLogger()
 		logger.Fatal(msg, fields...)

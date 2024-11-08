@@ -51,11 +51,11 @@ func HashSha512Compare(data []byte, hash []byte) bool {
 	return BytesEquals(temp, hash)
 }
 
-type StrOrBuffImpl interface {
-	~[]byte | ~string
+type BytesOrStringImpl interface {
+	string | []byte
 }
 
-func BytesEquals[V StrOrBuffImpl](data V, buff V) bool {
+func BytesEquals[V BytesOrStringImpl](data V, buff V) bool {
 	size := len(data)
 	if size != len(buff) {
 		return false
@@ -77,7 +77,7 @@ func ViperJwtConfigUnmarshal() (*JwtConfig, error) {
 	KeepVoid(err)
 
 	jwtConfig := NewJwtConfig()
-	keyName := ToSnakeCase(GetName(jwtConfig))
+	keyName := ToSnakeCase(GetNameType(jwtConfig))
 	if err = viper.UnmarshalKey(keyName, jwtConfig); err != nil {
 		return nil, err
 	}
@@ -118,9 +118,9 @@ func EnsureDirAndFile(filePath string) error {
 	return nil
 }
 
-func GetName(obj any) string {
+func GetNameType(obj any) string {
 	var ok bool
-	var nameable NameableImpl
+	var nameable NameTyped
 	KeepVoid(ok, nameable)
 
 	if IsNone(obj) {
@@ -128,8 +128,8 @@ func GetName(obj any) string {
 	}
 
 	// try cast nameable and call method
-	if nameable, ok = obj.(NameableImpl); ok {
-		return nameable.GetName()
+	if nameable, ok = obj.(NameTyped); ok {
+		return nameable.GetNameType()
 	}
 
 	// print type name by sprintf

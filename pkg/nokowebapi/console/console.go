@@ -2,16 +2,13 @@ package console
 
 import (
 	"fmt"
-	"github.com/mattn/go-colorable"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"io"
 	"nokowebapi/cores"
 	"nokowebapi/globals"
+	"nokowebapi/xterm"
 )
-
-var Stdout = colorable.NewColorableStdout()
-var Stderr = colorable.NewColorableStderr()
 
 var WriterSyncer zapcore.WriteSyncer
 
@@ -52,8 +49,8 @@ func makeLogger() *zap.Logger {
 	cores.KeepVoid(logger)
 
 	loggerConfig := globals.Globals().GetLoggerConfig()
-	writerSyncer := NewWriterSyncer(Stdout)
-	level := globals.GetLoggerConfigLevel(loggerConfig)
+	writerSyncer := NewWriterSyncer(xterm.Stdout)
+	level := loggerConfig.GetLevel()
 
 	options := []zap.Option{
 		zap.AddCaller(),
@@ -68,12 +65,12 @@ func makeLogger() *zap.Logger {
 
 	if loggerConfig.Development {
 		encoderConfig := zap.NewProductionEncoderConfig()
-		encoder := globals.GetLoggerConfigEncoder(loggerConfig, encoderConfig)
+		encoder := loggerConfig.GetEncoder(encoderConfig)
 		core := zapcore.NewCore(encoder, writerSyncer, level)
 		logger = zap.New(core, options...)
 	} else {
 		encoderConfig := zap.NewDevelopmentEncoderConfig()
-		encoder := globals.GetLoggerConfigEncoder(loggerConfig, encoderConfig)
+		encoder := loggerConfig.GetEncoder(encoderConfig)
 		core := zapcore.NewCore(encoder, writerSyncer, level)
 		logger = zap.New(core, options...)
 	}
@@ -127,8 +124,8 @@ func Warn(msg string, fields ...zap.Field) {
 func Error(msg string, fields ...zap.Field) {
 	locker := GetLocker()
 	locker.Lock(func() {
-		defer updateWriterSyncer(Stdout)
-		updateWriterSyncer(Stderr)
+		defer updateWriterSyncer(xterm.Stdout)
+		updateWriterSyncer(xterm.Stderr)
 
 		logger := NewLogger()
 		logger.Error(msg, fields...)
@@ -138,8 +135,8 @@ func Error(msg string, fields ...zap.Field) {
 func Fatal(msg string, fields ...zap.Field) {
 	locker := GetLocker()
 	locker.Lock(func() {
-		defer updateWriterSyncer(Stdout)
-		updateWriterSyncer(Stderr)
+		defer updateWriterSyncer(xterm.Stdout)
+		updateWriterSyncer(xterm.Stderr)
 
 		logger := NewLogger()
 		logger.Fatal(msg, fields...)

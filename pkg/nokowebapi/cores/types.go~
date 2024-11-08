@@ -57,7 +57,7 @@ type JsonableImpl interface {
 	ToJson() string
 }
 
-type NameTyped interface {
+type NameableImpl interface {
 	GetNameType() string
 }
 

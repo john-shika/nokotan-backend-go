@@ -9,17 +9,17 @@ import (
 	"time"
 )
 
-var ErrJwtTokenNotFound = errors.New("exception: JWT token not found")
-var ErrJwtClaimsInvalid = errors.New("exception: Invalid JWT claims")
-var ErrJwtIdentityNotFound = errors.New("exception: JWT identity not found")
-var ErrJwtIssuedAtNotFound = errors.New("exception: JWT issued at not found")
-var ErrJwtIssuerNotFound = errors.New("exception: JWT issuer not found")
-var ErrJwtSubjectNotFound = errors.New("exception: JWT subject not found")
-var ErrJwtExpiresNotFound = errors.New("exception: JWT expires not found")
-var ErrJwtSessionIdNotFound = errors.New("exception: JWT session id not found")
-var ErrJwtUserInvalid = errors.New("exception: JWT user not found")
-var ErrJwtEmailInvalid = errors.New("exception: JWT email not found")
-var ErrJwtSecretKeyNotFound = errors.New("exception: JWT secret key not found")
+var ErrJwtTokenNotFound = errors.New("jwt token not found")
+var ErrJwtClaimsInvalid = errors.New("invalid JWT claims")
+var ErrJwtIdentityNotFound = errors.New("jwt identity not found")
+var ErrJwtIssuedAtNotFound = errors.New("jwt issued at not found")
+var ErrJwtIssuerNotFound = errors.New("jwt issuer not found")
+var ErrJwtSubjectNotFound = errors.New("jwt subject not found")
+var ErrJwtExpiresNotFound = errors.New("jwt expires not found")
+var ErrJwtSessionIdNotFound = errors.New("jwt session id not found")
+var ErrJwtUserInvalid = errors.New("jwt user not found")
+var ErrJwtEmailInvalid = errors.New("jwt email not found")
+var ErrJwtSecretKeyNotFound = errors.New("jwt secret key not found")
 
 var JwtSigningMethod jwt.SigningMethod = jwt.SigningMethodHS256
 
@@ -37,11 +37,9 @@ func NewJwtConfig() *JwtConfig {
 	return new(JwtConfig)
 }
 
-func (JwtConfig) GetName() string {
+func (j *JwtConfig) GetNameType() string {
 	return "Jwt"
 }
-
-// TODO: not implemented yet
 
 type JwtClaimNamed string
 

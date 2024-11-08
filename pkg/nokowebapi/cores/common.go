@@ -2,13 +2,14 @@ package cores
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"github.com/google/uuid"
 	"strings"
 	"sync"
 )
 
-// var ErrDataTypeInvalid = errors.New("exception: invalid data type")
+var ErrDataTypeInvalid = errors.New("invalid data type")
 
 var EmptyString string
 
@@ -63,7 +64,7 @@ func ToString(value any) string {
 }
 
 type ErrOrOkImpl interface {
-	~bool | any
+	bool | any
 }
 
 func IsOk[T ErrOrOkImpl](eOk T) bool {
@@ -165,6 +166,10 @@ func NewMapAny() MapAnyImpl {
 	return NewMap[any]()
 }
 
+func (m Map[T]) GetNameType() string {
+	return "Map"
+}
+
 func (m Map[T]) Len() int {
 	return len(m)
 }
@@ -241,6 +246,66 @@ func (m Map[T]) RemoveByKey(key string) bool {
 
 	delete(m, key)
 	return true
+}
+
+// TODO: not implemented yet
+
+type ArrayImpl[T any] interface {
+	At(index int) T
+	Set(index int, value T)
+	Concat(arrays ...ArrayImpl[T]) ArrayImpl[T]
+	Append(values ...T) ArrayImpl[T]
+	Len() int
+}
+
+type Array[T any] []T
+type ArrayAny = Array[any]
+
+func NewArray[T any](size int) ArrayImpl[T] {
+	return make(Array[T], size)
+}
+
+func (a Array[T]) GetNameType() string {
+	return "Array"
+}
+
+func (a Array[T]) At(index int) T {
+	return a[index]
+}
+
+func (a Array[T]) Set(index int, value T) {
+	a[index] = value
+}
+
+func (a Array[T]) Concat(arrays ...ArrayImpl[T]) ArrayImpl[T] {
+	temp := a
+
+	for i, array := range arrays {
+		KeepVoid(i)
+
+		var ok bool
+		var slice []T
+		KeepVoid(ok, slice)
+
+		if slice, ok = Cast[[]T](array); !ok {
+			for j := 0; j < array.Len(); j++ {
+				temp = append(temp, array.At(j))
+			}
+			continue
+		}
+
+		temp = append(temp, slice...)
+	}
+
+	return temp
+}
+
+func (a Array[T]) Append(values ...T) ArrayImpl[T] {
+	return append(a, values...)
+}
+
+func (a Array[T]) Len() int {
+	return len(a)
 }
 
 func Cast[T any](value any) (T, bool) {

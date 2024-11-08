@@ -8,14 +8,14 @@ type ReOrStrImpl interface {
 	string | *regexp.Regexp
 }
 
-var regexes = make(map[string]*regexp.Regexp)
+var globals = make(map[string]*regexp.Regexp)
 
 func GetRegexGlobals(pattern string) *regexp.Regexp {
 	var ok bool
 	var re *regexp.Regexp
-	if re, ok = regexes[pattern]; !ok {
+	if re, ok = globals[pattern]; !ok {
 		re = regexp.MustCompile(pattern)
-		regexes[pattern] = re
+		globals[pattern] = re
 		return re
 	}
 	return re

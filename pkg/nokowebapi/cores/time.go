@@ -5,9 +5,7 @@ import (
 	"time"
 )
 
-const (
-	TimeFormatISO8601 = "2006-01-02T15:04:05.000Z07:00"
-)
+const TimeFormatISO8601 = "2006-01-02T15:04:05.000Z07:00"
 
 func GetTimeUtcNow() time.Time {
 	return time.Now().UTC()

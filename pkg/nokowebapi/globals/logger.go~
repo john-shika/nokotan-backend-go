@@ -8,10 +8,11 @@ import (
 )
 
 type LoggerConfig struct {
-	Development       bool   `mapstructure:"development" json:"development"`
-	Encoding          string `mapstructure:"encoding" json:"encoding"`
-	Level             string `mapstructure:"level" json:"level"`
-	StackTraceEnabled bool   `mapstructure:"stack_trace_enabled" json:"stackTraceEnabled"`
+	Development       bool   `mapstructure:"development" json:"development" yaml:"development"`
+	Encoding          string `mapstructure:"encoding" json:"encoding" yaml:"encoding"`
+	Level             string `mapstructure:"level" json:"level" yaml:"level"`
+	StackTraceEnabled bool   `mapstructure:"stack_trace_enabled" json:"stackTraceEnabled" yaml:"stack_trace_enabled"`
+	Colorable         bool   `mapstructure:"colorable" json:"colorable" yaml:"colorable"`
 }
 
 func NewLoggerConfig() *LoggerConfig {
@@ -39,8 +40,12 @@ func GetLoggerConfigLevel(loggerConfig *LoggerConfig) zapcore.Level {
 	}
 }
 
-func customEncoderConfig(encoderConfig zapcore.EncoderConfig) zapcore.EncoderConfig {
-	encoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+func customEncoderConfig(encoderConfig zapcore.EncoderConfig, colorable bool) zapcore.EncoderConfig {
+	if colorable {
+		encoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+	} else {
+		encoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
+	}
 	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 	encoderConfig.EncodeDuration = zapcore.StringDurationEncoder
 	encoderConfig.EncodeCaller = zapcore.ShortCallerEncoder
@@ -49,9 +54,9 @@ func customEncoderConfig(encoderConfig zapcore.EncoderConfig) zapcore.EncoderCon
 
 func GetLoggerConfigEncoder(loggerConfig *LoggerConfig, encoderConfig zapcore.EncoderConfig) zapcore.Encoder {
 	switch cores.ToSnakeCase(loggerConfig.Encoding) {
-	case "console":
+	case "console", "print", "text", "text/plain":
 		return zapcore.NewConsoleEncoder(customEncoderConfig(encoderConfig))
-	case "json":
+	case "json", "application/json":
 		return zapcore.NewJSONEncoder(customEncoderConfig(encoderConfig))
 	default:
 		return zapcore.NewConsoleEncoder(customEncoderConfig(encoderConfig))
@@ -91,6 +96,7 @@ func LoggerConfigGlobals() *LoggerConfig {
 	config.SetValueByKey("level", loggerConfig.Level)
 	config.SetValueByKey("encoding", loggerConfig.Encoding)
 	config.SetValueByKey("stackTraceEnabled", loggerConfig.StackTraceEnabled)
+	config.SetValueByKey("colorable", loggerConfig.Colorable)
 
 	return loggerConfig
 }
@@ -104,6 +110,7 @@ func GetLoggerConfigGlobals() *LoggerConfig {
 	loggerConfig.Level = config.GetValueByKey("level").(string)
 	loggerConfig.Encoding = config.GetValueByKey("encoding").(string)
 	loggerConfig.StackTraceEnabled = config.GetValueByKey("stackTraceEnabled").(bool)
+	loggerConfig.Colorable = config.GetValueByKey("colorable").(bool)
 
 	return loggerConfig
 }

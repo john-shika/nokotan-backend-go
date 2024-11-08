@@ -25,14 +25,11 @@ func main() {
 		panic(fmt.Errorf("fatal error config file: %w", err))
 	}
 
-	cores.ApplyMainFunc(app.Main)
-
-	return
+	//cores.ApplyMainFunc(app.Main)
+	//return
 
 	console.Dir(globals.Globals().GetJwtConfig())
-
 	console.Log(fmt.Sprintf("JWT config expires in = %f / hour \n", cores.Unwrap(time.ParseDuration(globals.Globals().GetJwtConfig().ExpiresIn)).Hours()))
-
 	return
 
 	console.Warn("This is warning message.", zap.Int("EXIT_CODE", cores.ExitCodeFailure))
@@ -45,7 +42,7 @@ func main() {
 
 	console.Log("Try fetch url.")
 
-	cores.TryFetchUrlWaitForAlive(cores.Unwrap(url.Parse("http://localhost")), 1800)
+	cores.TryFetchUrlWaitForAlive(cores.Unwrap(url.Parse("http://localhost")), 12, time.Second)
 
 	buff := cores.Unwrap(cores.HashPassword("Admin@1234"))
 	fmt.Println("Compare Password =", cores.CompareHashPassword(buff, "Admin@1234"))

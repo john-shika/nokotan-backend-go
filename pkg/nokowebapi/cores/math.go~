@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-var ErrValueIsEmpty = errors.New("value is empty")
+var ErrValueIsEmpty = errors.New("exception: value is empty")
 
 func Abs(values ...int) (int, error) {
 	size := len(values)

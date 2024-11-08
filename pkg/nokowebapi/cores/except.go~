@@ -1,8 +1,11 @@
 package cores
 
 import (
+	"errors"
 	"fmt"
 )
+
+var ErrDataTypeInvalid = errors.New("invalid data type")
 
 type Exception struct {
 	error

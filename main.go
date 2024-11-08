@@ -6,7 +6,6 @@ import (
 	"go.uber.org/zap"
 	"math/big"
 	"net/url"
-	"nokotan/app"
 	"nokowebapi/console"
 	"nokowebapi/cores"
 	"nokowebapi/globals"
@@ -25,14 +24,11 @@ func main() {
 		panic(fmt.Errorf("fatal error config file: %w", err))
 	}
 
-	cores.ApplyMainFunc(app.Main)
-
-	return
+	//cores.ApplyMainFunc(app.Main)
+	//return
 
 	console.Dir(globals.Globals().GetJwtConfig())
-
 	console.Log(fmt.Sprintf("JWT config expires in = %f / hour \n", cores.Unwrap(time.ParseDuration(globals.Globals().GetJwtConfig().ExpiresIn)).Hours()))
-
 	return
 
 	console.Warn("This is warning message.", zap.Int("EXIT_CODE", cores.ExitCodeFailure))
