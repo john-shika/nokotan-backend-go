@@ -1,7 +1,6 @@
 package console
 
 import (
-	"fmt"
 	"github.com/mattn/go-colorable"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -105,14 +104,6 @@ func Log(msg string, fields ...zap.Field) {
 	locker.Lock(func() {
 		logger := NewLogger()
 		logger.Info(msg, fields...)
-	})
-}
-
-func Logf(format string, args ...any) {
-	locker := GetLocker()
-	locker.Lock(func() {
-		logger := NewLogger()
-		logger.Info(fmt.Sprintf(format, args...))
 	})
 }
 

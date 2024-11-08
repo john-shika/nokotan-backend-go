@@ -686,16 +686,16 @@ func shikaJsonEncodeIndentPermutate(shikaObjectProperty ShikaObjectPropertyImpl,
 	}
 }
 
-func ShikaJsonEncodeIndent(obj any, indent int) string {
+func ShikaJsonEncodeIndentPreview(obj any, indent int) string {
 	shikaObjectProperty := ShikaObjectPropertyConversion(obj)
 	return shikaJsonEncodeIndentPermutate(shikaObjectProperty, indent, 0)
 }
 
-func ShikaJsonEncode(obj any) string {
-	return ShikaJsonEncodeIndent(obj, 4)
+func ShikaJsonEncodePreview(obj any) string {
+	return ShikaJsonEncodeIndentPreview(obj, 4)
 }
 
-func shikaYamlEncodeIndentPermutate(shikaObjectProperty ShikaObjectPropertyImpl, indent int, start int) string {
+func ShikaYamlEncodeIndentPermutatePreview(shikaObjectProperty ShikaObjectPropertyImpl, indent int, start int) string {
 	var err error
 	var t time.Time
 	KeepVoid(err, t)
@@ -797,7 +797,7 @@ func shikaYamlEncodeIndentPermutate(shikaObjectProperty ShikaObjectPropertyImpl,
 		values := make([]string, size)
 		for i := 0; i < size; i++ {
 			elem := shikaObjectProperties[i]
-			v := shikaYamlEncodeIndentPermutate(elem, indent, end)
+			v := ShikaYamlEncodeIndentPermutatePreview(elem, indent, end)
 			if len(v) > 0 {
 				if v[0] == '\n' {
 					s := len(whiteSpaceStart) + 3 // truncate the newline, hyphen and whitespace
@@ -821,7 +821,7 @@ func shikaYamlEncodeIndentPermutate(shikaObjectProperty ShikaObjectPropertyImpl,
 			elem := shikaVarObjects[i]
 			k := ToSnakeCase(elem.GetName())
 			v := elem.GetOwnProperty()
-			values[i] = whiteSpaceStart + k + ": " + shikaYamlEncodeIndentPermutate(v, indent, end)
+			values[i] = whiteSpaceStart + k + ": " + ShikaYamlEncodeIndentPermutatePreview(v, indent, end)
 		}
 		if len(values) > 0 {
 			return header + strings.Join(values, "\n")
@@ -840,7 +840,7 @@ func shikaYamlEncodeIndentPermutate(shikaObjectProperty ShikaObjectPropertyImpl,
 
 func ShikaYamlEncodeIndent(obj any, indent int) string {
 	shikaObjectProperty := ShikaObjectPropertyConversion(obj)
-	return shikaYamlEncodeIndentPermutate(shikaObjectProperty, indent, 0)
+	return ShikaYamlEncodeIndentPermutatePreview(shikaObjectProperty, indent, 0)
 }
 
 func ShikaYamlEncode(obj any) string {

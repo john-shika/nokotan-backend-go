@@ -52,11 +52,19 @@ func New(value float64) *BigFloat {
 }
 
 func (b *BigFloat) MarshalBinary() (data []byte, err error) {
-	return b.Value.GobEncode()
+	var buff []byte
+	return b.Value.Append(buff, 'g', -1), nil
 }
 
 func (b *BigFloat) UnmarshalBinary(data []byte) (err error) {
-	return b.Value.GobDecode(data)
+	var f *big.Float
+
+	if f, _, err = b.Value.Parse(string(data), 0); err != nil {
+		return err
+	}
+
+	b.Value = f
+	return nil
 }
 
 func (b *BigFloat) MarshalText() (text []byte, err error) {

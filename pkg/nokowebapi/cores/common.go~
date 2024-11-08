@@ -347,7 +347,7 @@ func Base64DecodeURLSafe(data string) ([]byte, error) {
 	return base64.RawURLEncoding.DecodeString(data)
 }
 
-func NewUUID() uuid.UUID {
+func GenerateUUIDV7() string {
 	var err error
 	var temp uuid.UUID
 	KeepVoid(err, temp)
@@ -356,7 +356,7 @@ func NewUUID() uuid.UUID {
 		panic(err)
 	}
 
-	return temp
+	return temp.String()
 }
 
 // TODO: not implemented yet

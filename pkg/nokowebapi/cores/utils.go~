@@ -18,36 +18,36 @@ func HexDecodeToBytes(data string) ([]byte, error) {
 	return hex.DecodeString(data)
 }
 
-func HashSha256(data []byte) []byte {
+func GetHashSha256(data []byte) []byte {
 	hash := sha256.New()
 	buff := hash.Sum(data)
 	return buff
 }
 
 func HashSha256Compare(data []byte, hash []byte) bool {
-	temp := HashSha256(data)
+	temp := GetHashSha256(data)
 	return BytesEquals(temp, hash)
 }
 
-func HashSha384(data []byte) []byte {
+func GetHashSha384(data []byte) []byte {
 	hash := sha512.New384()
 	buff := hash.Sum(data)
 	return buff
 }
 
 func HashSha384Compare(data []byte, hash []byte) bool {
-	temp := HashSha384(data)
+	temp := GetHashSha384(data)
 	return BytesEquals(temp, hash)
 }
 
-func HashSha512(data []byte) []byte {
+func GetHashSha512(data []byte) []byte {
 	hash := sha512.New()
 	buff := hash.Sum(data)
 	return buff
 }
 
 func HashSha512Compare(data []byte, hash []byte) bool {
-	temp := HashSha512(data)
+	temp := GetHashSha512(data)
 	return BytesEquals(temp, hash)
 }
 

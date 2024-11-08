@@ -45,7 +45,7 @@ func main() {
 
 	console.Log("Try fetch url.")
 
-	cores.TryFetchUrlWaitForAlive(cores.Unwrap(url.Parse("http://localhost")), 12, time.Second)
+	cores.TryFetchUrlWaitForAlive(cores.Unwrap(url.Parse("http://localhost")), 1800)
 
 	buff := cores.Unwrap(cores.HashPassword("Admin@1234"))
 	fmt.Println("Compare Password =", cores.CompareHashPassword(buff, "Admin@1234"))

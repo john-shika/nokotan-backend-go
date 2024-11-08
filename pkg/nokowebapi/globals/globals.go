@@ -4,12 +4,12 @@ import (
 	"nokowebapi/cores"
 )
 
-var Defaults = cores.MapAny{
+var DefaultConfig = cores.MapAny{
 	"jwt": cores.MapAny{
 		"algorithm": "HS256",
 		"audience":  "your-audience",
 		"issuer":    "your-issuer",
-		"secretKey": "your-secret-key",
+		"secretKey": "your-super-secret-key-keep-it-mind-dont-tell-anyone",
 		"expiresIn": "1h",
 	},
 	"logger": cores.MapAny{

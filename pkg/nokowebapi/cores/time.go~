@@ -43,8 +43,8 @@ func GetTimeUtcISO8601(value any) (time.Time, error) {
 	var t time.Time
 	KeepVoid(err, t)
 
-	val := PassValueIndirectReflect(value)
-	if !IsValidReflect(val) {
+	val := PassValueIndirectReflection(value)
+	if !IsValidReflection(val) {
 		return Default[time.Time](), ErrDataTypeInvalid
 	}
 	value = val.Interface()

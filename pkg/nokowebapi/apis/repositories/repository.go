@@ -1,4 +1,4 @@
-package apis
+package repositories
 
 type BaseRepositoryImpl struct{}
 

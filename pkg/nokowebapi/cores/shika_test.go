@@ -26,6 +26,6 @@ func TestShikaJsonEncodePreview_Ptr(t *testing.T) {
 	user3.SetValueByKey("cities", []string{"London", "Paris"})
 	data.SetValueByKey("users", []MapAnyImpl{user1, user2, user3})
 
-	fmt.Println(ShikaJsonEncodePreview(data))
-	fmt.Println(ShikaYamlEncodePreview(data))
+	fmt.Println(ShikaJsonEncode(data))
+	fmt.Println(ShikaYamlEncode(data))
 }

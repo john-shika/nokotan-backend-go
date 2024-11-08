@@ -54,13 +54,13 @@ func TryFetchUrl(URL *url.URL) bool {
 	return 100 <= res.StatusCode && res.StatusCode < 500
 }
 
-func TryFetchUrlWaitForAlive(URL *url.URL, n int, duration time.Duration) bool {
+func TryFetchUrlWaitForAlive(URL *url.URL, n int, duration time.Duration) {
 	for i := 0; i < n; i++ {
 		fmt.Printf("-> try fetch URL = %s, %d times\n", URL.String(), i+1)
 		if TryFetchUrl(URL) {
-			return true
+			return
 		}
 		time.Sleep(duration)
 	}
-	return false
+	panic("failed to fetch URL")
 }

@@ -17,5 +17,5 @@ func TestJwtClaims_ToJwtClaimsAccessData(t *testing.T) {
 	jwtClaims := Unwrap(GetJwtClaimsFromJwtToken(jwtToken))
 	jwtClaimsAccessData := CvtJwtClaimsToJwtClaimsAccessData(jwtClaims)
 
-	fmt.Println(ShikaYamlEncode(jwtClaimsAccessData))
+	fmt.Println(ShikaYamlEncodePreview(jwtClaimsAccessData))
 }

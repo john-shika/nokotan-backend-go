@@ -6,24 +6,37 @@ import (
 	"strconv"
 )
 
-func EqualsReflection(value, other any) bool {
+func EqualsReflect(value, other any) bool {
 	return reflect.DeepEqual(value, other)
 }
 
-func PassTypeIndirectReflection(t reflect.Type) reflect.Type {
+func PassTypeIndirectReflect(t reflect.Type) reflect.Type {
 	switch t.Kind() {
 	case reflect.Pointer:
-		return PassTypeIndirectReflection(t.Elem())
+		return PassTypeIndirectReflect(t.Elem())
 	default:
 		return t
 	}
 }
 
-func TypeEqualsReflection(value reflect.Type, other reflect.Type) bool {
-	return PassTypeIndirectReflection(value) == PassTypeIndirectReflection(other)
+func TypeEqualsReflect(value reflect.Type, other reflect.Type) bool {
+	return PassTypeIndirectReflect(value) == PassTypeIndirectReflect(other)
 }
 
-func GetValueReflection(value any) reflect.Value {
+func GetTypeReflect(value any) reflect.Type {
+	var val reflect.Value
+	switch value.(type) {
+	case reflect.Type:
+		return value.(reflect.Type)
+	case reflect.Value:
+		val = value.(reflect.Value)
+	default:
+		val = reflect.ValueOf(value)
+	}
+	return val.Type()
+}
+
+func GetValueReflect(value any) reflect.Value {
 	var val reflect.Value
 	switch value.(type) {
 	case reflect.Type:
@@ -36,8 +49,12 @@ func GetValueReflection(value any) reflect.Value {
 	return val
 }
 
-func IsValidReflection(value any) bool {
-	val := GetValueReflection(value)
+func GetKindReflect(value any) reflect.Kind {
+	return PassValueIndirectReflect(value).Kind()
+}
+
+func IsValidReflect(value any) bool {
+	val := GetValueReflect(value)
 	// must be not zero value
 	if val.IsValid() {
 		switch val.Kind() {
@@ -55,32 +72,24 @@ func IsValidReflection(value any) bool {
 	return false
 }
 
-func PassValueIndirectReflection(value any) reflect.Value {
-	val := GetValueReflection(value)
+func PassValueIndirectReflect(value any) reflect.Value {
+	val := GetValueReflect(value)
 
-	if !IsValidReflection(val) {
+	if !IsValidReflect(val) {
 		return val
 	}
 
 	switch val.Kind() {
 	case reflect.Interface, reflect.Pointer:
-		return PassValueIndirectReflection(val.Elem())
+		return PassValueIndirectReflect(val.Elem())
 	default:
 		return val
 	}
 }
 
-func GetTypeReflection(value any) reflect.Type {
-	return PassValueIndirectReflection(value).Type()
-}
-
-func GetKindReflection(value any) reflect.Kind {
-	return PassValueIndirectReflection(value).Kind()
-}
-
-func IsCountableReflection[T any](value T) bool {
-	val := PassValueIndirectReflection(value)
-	if !IsValidReflection(val) {
+func IsCountableReflect[T any](value T) bool {
+	val := PassValueIndirectReflect(value)
+	if !IsValidReflect(val) {
 		panic("invalid value")
 	}
 	switch val.Kind() {
@@ -91,27 +100,27 @@ func IsCountableReflection[T any](value T) bool {
 	}
 }
 
-func GetSizeReflection(value any) int {
-	val := PassValueIndirectReflection(value)
-	if !IsCountableReflection(val) {
+func GetSizeReflect(value any) int {
+	val := PassValueIndirectReflect(value)
+	if !IsCountableReflect(val) {
 		panic("value is not countable")
 	}
 	return val.Len()
 }
 
-func IsZeroOrEmptyReflection(value any) bool {
-	if !IsValidReflection(value) {
+func IsNoneOrEmptyReflect(value any) bool {
+	if !IsValidReflect(value) {
 		return true
 	}
-	if IsCountableReflection(value) {
-		return GetSizeReflection(value) == 0
+	if IsCountableReflect(value) {
+		return GetSizeReflect(value) == 0
 	}
 	return false
 }
 
-func IsStringableReflection(value any) bool {
-	val := PassValueIndirectReflection(value)
-	if !IsValidReflection(val) {
+func IsStringableReflect(value any) bool {
+	val := PassValueIndirectReflect(value)
+	if !IsValidReflect(val) {
 		panic("invalid value")
 	}
 	switch val.Kind() {
@@ -122,31 +131,31 @@ func IsStringableReflection(value any) bool {
 	}
 }
 
-func IsExportedFieldReflection(value any) bool {
-	val := PassValueIndirectReflection(value)
-	if !IsValidReflection(val) {
+func IsExportedFieldReflect(value any) bool {
+	val := PassValueIndirectReflect(value)
+	if !IsValidReflect(val) {
 		return false
 	}
 	return val.CanInterface()
 }
 
-func IsExportedFieldByIndexReflection(value any, index int) bool {
-	val := PassValueIndirectReflection(value)
-	if !IsValidReflection(val) {
+func IsExportedFieldAtReflect(value any, index int) bool {
+	val := PassValueIndirectReflect(value)
+	if !IsValidReflect(val) {
 		return false
 	}
-	return IsExportedFieldReflection(val.Field(index))
+	return IsExportedFieldReflect(val.Field(index))
 }
 
-func IsExportedFieldByNameReflection(value any, name string) bool {
-	val := PassValueIndirectReflection(value)
-	if !IsValidReflection(val) {
+func IsExportedFieldByNameReflect(value any, name string) bool {
+	val := PassValueIndirectReflect(value)
+	if !IsValidReflect(val) {
 		return false
 	}
-	return IsExportedFieldReflection(val.FieldByName(name))
+	return IsExportedFieldReflect(val.FieldByName(name))
 }
 
-func ToStringReflection(value any) string {
+func ToStringReflect(value any) string {
 	if value == nil {
 		return "<null>"
 	}
@@ -155,8 +164,8 @@ func ToStringReflection(value any) string {
 		return val.ToString()
 	}
 
-	val := PassValueIndirectReflection(value)
-	if !IsValidReflection(val) {
+	val := PassValueIndirectReflect(value)
+	if !IsValidReflect(val) {
 		return "<null>"
 	}
 
@@ -213,17 +222,17 @@ func PassValueIndirect[T any](value any) T {
 }
 
 func PassAnyValueIndirect(value any) any {
-	val := PassValueIndirectReflection(value)
-	if !IsValidReflection(val) {
+	val := PassValueIndirectReflect(value)
+	if !IsValidReflect(val) {
 		return nil
 	}
 
 	return val.Interface()
 }
 
-func GetNameReflection(value any) string {
-	val := PassValueIndirectReflection(value)
-	if !IsValidReflection(val) {
+func GetNameReflect(value any) string {
+	val := PassValueIndirectReflect(value)
+	if !IsValidReflect(val) {
 		panic("invalid value")
 	}
 	method := val.MethodByName("GetName")
